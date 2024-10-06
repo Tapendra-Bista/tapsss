@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="gray">#FF000000</color>
+    <color name="redPastel">#E43C3C</color>
+    <color name="greenPastel">#77DD77</color>
+    <color name="colorPrimary">#cfbafd</color>
+    <color name="material_on_surface_stroke">@color/black</color>
+    <color name="material_on_surface_emphasis_medium">@color/white</color>
+</resources>
