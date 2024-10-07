@@ -42,4 +42,6 @@
     <string name="stats">Stats</string>
     <string name="location_data">Location Data</string>
     <string name="include_location_data_in_watermark_nrequires_gps_enabled_n_default_disabled">Include location data in watermark. \nRequires GPS enabled \n(Default: Disabled)</string>
+    <string name="privacy_info">Privacy Info</string>
+    <string name="checking_for_updates">Checking for updates...</string>
 </resources>

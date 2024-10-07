@@ -32,15 +32,7 @@
                 android:contentDescription="@string/todo"
                 app:srcCompat="@drawable/ic_list" />
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fab_delete_selected"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|start"
-                android:layout_margin="16dp"
-                android:contentDescription="@string/todo"
-                android:visibility="gone"
-                app:srcCompat="@drawable/ic_delete" />
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

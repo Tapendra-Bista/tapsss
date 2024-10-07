@@ -9,13 +9,14 @@
         <ImageView
             android:id="@+id/loading_icon"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/todo" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/loading_message"
-            android:text="Checking for updates..."
+            android:text="@string/checking_for_updates"
             android:textColor="#FFFFFF"
             android:paddingTop="8dp"/>
     </LinearLayout>

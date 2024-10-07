@@ -1,6 +1,5 @@
 package com.tapsss.ui;
 
-import com.tapsss.ui.LocationHelper;
 
 import android.Manifest;
 import android.content.Context;
@@ -24,7 +23,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.appbar.MaterialToolbar;
+
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
@@ -32,11 +31,13 @@ import com.tapsss.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
+import java.util.Objects;
+
 public class SettingsFragment extends Fragment {
 
     private SharedPreferences sharedPreferences;
 
-    private LocationHelper locationHelper;
+
 
     private static final String PREF_CAMERA_SELECTION = "camera_selection";
     private static final String PREF_VIDEO_QUALITY = "video_quality";
@@ -51,19 +52,7 @@ public class SettingsFragment extends Fragment {
     private static final int REQUEST_PERMISSIONS = 1;
     private static final String PREF_FIRST_LAUNCH = "first_launch";
 
-    private void vibrateTouch() {
-        // Haptic Feedback
-        Vibrator vibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
-        if (vibrator != null && vibrator.hasVibrator()) {
-            VibrationEffect effect = null;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(effect);
-            }
-        }
-    }
+
     private void updateButtonAppearance(MaterialButton button, boolean isSelected) {
         button.setIconTintResource(isSelected ? R.color.black : android.R.color.transparent); // color for check icon
         button.setStrokeColorResource(isSelected ? R.color.colorPrimary : R.color.material_on_surface_stroke); // the last color is for the button that's not selected
@@ -75,7 +64,7 @@ public class SettingsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE);
-        locationHelper = new LocationHelper(requireContext());
+
     }
 
     @Override
@@ -93,7 +82,7 @@ public class SettingsFragment extends Fragment {
         // Setup spinner items with array resource
         Spinner qualitySpinner = view.findViewById(R.id.quality_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                getContext(), R.array.video_quality_options, android.R.layout.simple_spinner_item);
+                requireContext(), R.array.video_quality_options, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         qualitySpinner.setAdapter(adapter);
 
@@ -118,11 +107,7 @@ public class SettingsFragment extends Fragment {
         return view;
     }
 
-    private void openInAppBrowser(String url) {
-        Intent intent = new Intent(getContext(), WebViewActivity.class);
-        intent.putExtra("url", url);
-        startActivity(intent);
-    }
+
 
     private void setupLocationSwitch(MaterialSwitch locationSwitch) {
         boolean isLocationEnabled = sharedPreferences.getBoolean(PREF_LOCATION_DATA, false);
@@ -139,7 +124,7 @@ public class SettingsFragment extends Fragment {
             } else {
                 sharedPreferences.edit().putBoolean(PREF_LOCATION_DATA, false).apply();
             }
-            vibrateTouch();
+
         });
     }
 
@@ -165,32 +150,21 @@ public class SettingsFragment extends Fragment {
         boolean isLocationEnabled = sharedPreferences.getBoolean(PREF_LOCATION_DATA, false);
         locationSwitch.setChecked(isLocationEnabled);
 
-        if (isLocationEnabled) {
-            locationHelper.startLocationUpdates();
-        } else {
-            locationHelper.stopLocationUpdates();
-        }
+
+
 
         locationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPreferences.edit().putBoolean(PREF_LOCATION_DATA, isChecked).apply();
             if (isChecked) {
                 requestLocationPermission();
-            } else {
-                locationHelper.stopLocationUpdates();
             }
-            vibrateTouch();
+
         });
     }
 
 
     private static final int REQUEST_LOCATION_PERMISSION = 1;
-//    private void requestLocationPermission() {
-//        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
-//        } else {
-//            locationHelper.startLocationUpdates();
-//        }
-//    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -199,7 +173,7 @@ public class SettingsFragment extends Fragment {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 sharedPreferences.edit().putBoolean(PREF_LOCATION_DATA, true).apply();
             } else {
-                MaterialSwitch locationSwitch = getView().findViewById(R.id.location_toggle_group);
+                MaterialSwitch locationSwitch = requireView().findViewById(R.id.location_toggle_group);
                 if (locationSwitch != null) {
                     locationSwitch.setChecked(false);
                 }
@@ -324,23 +298,7 @@ public class SettingsFragment extends Fragment {
         return values[2];
     }
 
-    private void showReadmeDialog() {
-        vibrateTouch();
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
-        builder.setTitle("Welcome to tapsss!");
 
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_readme, null);
-
-        MaterialButton githubButton = dialogView.findViewById(R.id.github_button);
-        githubButton.setOnClickListener(v -> openUrl("https://github.com/anonfaded/tapsss"));
-
-        MaterialButton discordButton = dialogView.findViewById(R.id.discord_button);
-        discordButton.setOnClickListener(v -> openUrl("https://discord.gg/kvAZvdkuuN"));
-
-        builder.setView(dialogView);
-        builder.setPositiveButton("OK", null);
-        builder.show();
-    }
 
     private void openUrl(String url) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));

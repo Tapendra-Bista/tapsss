@@ -1,35 +1,35 @@
 package com.tapsss.ui;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
+
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.text.InputType;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
+
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
+
 import androidx.appcompat.widget.PopupMenu;
-import androidx.core.content.FileProvider;
+
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.tapsss.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.textfield.TextInputEditText;
+
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,24 +39,26 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordViewHolder> {
 
     private final Context context;
     private List<File> records;
     private final OnVideoClickListener clickListener;
-    private final OnVideoLongClickListener longClickListener;
+
     private final List<File> selectedVideos = new ArrayList<>();
     private List<File> videoFiles;
 
 
-    public RecordsAdapter(Context context, List<File> records, OnVideoClickListener clickListener, OnVideoLongClickListener longClickListener) {
+    public RecordsAdapter(Context context, List<File> records, OnVideoClickListener clickListener, RecordsFragment recordsFragment) {
         this.context = context;
         this.records = records;
         this.clickListener = clickListener;
-        this.longClickListener = longClickListener;
+
         this.videoFiles = new ArrayList<>(records); // Initialize videoFiles with a copy of records
     }
 
@@ -82,12 +84,9 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
         holder.textViewRecord.setText(video.getName());
 
         holder.itemView.setOnClickListener(v -> clickListener.onVideoClick(video));
-        holder.itemView.setOnLongClickListener(v -> {
-            boolean isSelected = !selectedVideos.contains(video);
-            toggleSelection(holder, video, isSelected);
-            longClickListener.onVideoLongClick(video, isSelected);
-            return true;
-        });
+
+
+
 
         holder.menuButton.setOnClickListener(v -> showPopupMenu(v, video));
         updateSelectionState(holder, selectedVideos.contains(video));
@@ -105,15 +104,7 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
                 .into(holder.imageViewThumbnail);
     }
 
-    private void toggleSelection(RecordViewHolder holder, File video, boolean isSelected) {
-        if (isSelected) {
-            selectedVideos.add(video);
-        } else {
-            selectedVideos.remove(video);
-        }
-        int position = records.indexOf(video);
-        notifyItemChanged(position);
-    }
+
 
     private void updateSelectionState(RecordViewHolder holder, boolean isSelected) {
         holder.itemView.setActivated(isSelected);
@@ -129,10 +120,9 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
 
         PopupMenu popup = new PopupMenu(v.getContext(), v);
         popup.getMenuInflater().inflate(R.menu.video_item_menu, popup.getMenu());
-
         popup.getMenu().findItem(R.id.action_delete).setIcon(R.drawable.ic_delete);
         popup.getMenu().findItem(R.id.action_save_to_gallery).setIcon(R.drawable.ic_save);
-        popup.getMenu().findItem(R.id.action_rename).setIcon(R.drawable.ic_rename);
+
 
         popup.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_delete) {
@@ -143,10 +133,7 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
                 saveToGallery(v.getContext(), records.get(position));
                 return true;
             }
-            if (item.getItemId() == R.id.action_rename) {
-                showRenameDialog(position);
-                return true;
-            }
+
             return false;
         });
 
@@ -154,7 +141,7 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
             Field field = popup.getClass().getDeclaredField("mPopup");
             field.setAccessible(true);
             Object menuPopupHelper = field.get(popup);
-            Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+            Class<?> classPopupHelper = Class.forName(Objects.requireNonNull(menuPopupHelper).getClass().getName());
             Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
             setForceIcons.invoke(menuPopupHelper, true);
         } catch (Exception e) {
@@ -199,23 +186,25 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
         }
-        Uri itemUri = resolver.insert(collection, values);
+        Uri itemUri = resolver.insert(Objects.requireNonNull(collection), values);
 
         if (itemUri != null) {
-            try (InputStream in = new FileInputStream(video);
-                 OutputStream out = resolver.openOutputStream(itemUri)) {
-                byte[] buf = new byte[8192];
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                try (InputStream in = Files.newInputStream(video.toPath());
+                     OutputStream out = resolver.openOutputStream(itemUri)) {
+                    byte[] buf = new byte[8192];
+                    int len;
+                    while ((len = in.read(buf)) > 0) {
+                        Objects.requireNonNull(out).write(buf, 0, len);
+                    }
+                    Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                    Toast.makeText(context, "Failed to save", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
                 }
-                Toast.makeText(context, "Video saved to tapsss folder in Downloads", Toast.LENGTH_SHORT).show();
-            } catch (IOException e) {
-                Toast.makeText(context, "Failed to save video", Toast.LENGTH_SHORT).show();
-                e.printStackTrace();
             }
         } else {
-            Toast.makeText(context, "Failed to save video", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Failed to save", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -233,10 +222,10 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
             while ((len = in.read(buf)) > 0) {
                 out.write(buf, 0, len);
             }
-            Toast.makeText(context, "Video saved to tapsss folder in Downloads", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "saved", Toast.LENGTH_SHORT).show();
             MediaScannerConnection.scanFile(context, new String[]{destFile.getAbsolutePath()}, null, null);
         } catch (IOException e) {
-            Toast.makeText(context, "Failed to save video", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Failed to save", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
@@ -244,51 +233,17 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
 
 
 
-    private void showRenameDialog(final int position) {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
-        builder.setTitle("Rename Video");
-
-        // Inflate and set up the input view
-        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_rename, null);
-        final TextInputEditText input = dialogView.findViewById(R.id.edit_text_name);
-        builder.setView(dialogView);
-
-        builder.setPositiveButton("OK", (dialog, which) -> {
-            String newName = input.getText().toString();
-            if (!newName.isEmpty()) {
-                renameVideo(position, newName);
-            } else {
-                Toast.makeText(context, "Name cannot be empty", Toast.LENGTH_SHORT).show();
-            }
-        });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-        builder.show();
-    }
 
 
 
+
+    @SuppressLint("NotifyDataSetChanged")
     private void renameVideo(int position, String newName) {
         if (videoFiles == null || position < 0 || position >= videoFiles.size()) {
             Toast.makeText(context, "Invalid position or video list is null", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Replace spaces with underscores
-        String formattedName = newName.trim().replace(" ", "_");
-
-        File oldFile = videoFiles.get(position);
-        File newFile = new File(oldFile.getParent(), formattedName + ".mp4");
-
-        if (oldFile.renameTo(newFile)) {
-            // Update the list and notify the adapter
-            videoFiles.set(position, newFile);
-            records.set(position, newFile); // Also update the records list if necessary
-            notifyDataSetChanged();
-            Toast.makeText(context, "Video renamed successfully", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(context, "Failed to rename video", Toast.LENGTH_SHORT).show();
-        }
     }
 
 
@@ -342,7 +297,5 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
         diffResult.dispatchUpdatesTo(this);
     }
 
-    public void updateThumbnail(String videoFilePath) {
-        notifyDataSetChanged();
-    }
+
 }
