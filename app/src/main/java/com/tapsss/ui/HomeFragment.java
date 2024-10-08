@@ -91,11 +91,6 @@ public class HomeFragment extends Fragment {
     private long videoBitrate;
 
 
-
-    static final String PREF_LOCATION_DATA = "location_data";
-
-
-
     private File tempFileBeingProcessed;
 
     private final Handler handler = new Handler();
@@ -785,16 +780,13 @@ public class HomeFragment extends Fragment {
 
     private void startTipsAnimation() {
         if (tips.length > 0) {
-            animateTip(tips[currentTipIndex], tvTip, 100); // Adjust delay as needed
+            animateTip(tips[currentTipIndex], tvTip); // Adjust delay as needed
         }
     }
     private void updateTip() {
-        String currentTip = tips[currentTipIndex];
-        int typingIndex = 0;
-        boolean isTypingIn = true;
-//        animateTip(); this line is giving errors so i commented it
+        //        animateTip(); this line is giving errors so i commented it
     }
-    private void animateTip(String fullText, TextView textView, int delay) {
+    private void animateTip(String fullText, TextView textView) {
         final Handler handler = new Handler(Looper.getMainLooper());
         final int[] index = {0};
 
@@ -807,7 +799,7 @@ public class HomeFragment extends Fragment {
                     handler.postDelayed(this, 40); // add delay in typing the tips
                 } else {
                     currentTipIndex = (currentTipIndex + 1) % tips.length;
-                    handler.postDelayed(() -> animateTip(tips[currentTipIndex], textView, delay), 5000); // Wait 2 seconds before next tip
+                    handler.postDelayed(() -> animateTip(tips[currentTipIndex], textView), 5000); // Wait 2 seconds before next tip
                 }
             }
         };
@@ -844,13 +836,14 @@ public class HomeFragment extends Fragment {
         tvStats.setText(Html.fromHtml(statsText, Html.FROM_HTML_MODE_LEGACY));
     }
 
+    @SuppressLint("SetTextI18n")
     private void pauseRecording() {
         Log.d(TAG, "pauseRecording: Pausing video recording");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mediaRecorder.pause();
             isPaused = true;
             buttonPauseResume.setText("Resume");
-            buttonPauseResume.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play, 0, 0, 0);
+
         }
     }
 
@@ -858,8 +851,8 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "resumeRecording: Resuming video recording");
         mediaRecorder.resume();
         isPaused = false;
-        buttonPauseResume.setText("Pause");
-        buttonPauseResume.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pause, 0, 0, 0);
+        buttonPauseResume.setText("");
+
     }
 
 
@@ -1107,7 +1100,6 @@ public class HomeFragment extends Fragment {
 
     private void checkAndDeleteSpecificTempFile() {
         if (tempFileBeingProcessed != null) {
-            String tempTimestamp = extractTimestamp(tempFileBeingProcessed.getName());
 
             // Construct tapsss_ filename with the same timestamp
             String outputFilePath = tempFileBeingProcessed.getParent() + "/tapsss_" + tempFileBeingProcessed.getName().replace("temp_", "");
@@ -1231,8 +1223,6 @@ public class HomeFragment extends Fragment {
         String watermarkText =  "";
         String watermarkOption = getWatermarkOption();
 
-        boolean isLocationEnabled = sharedPreferences.getBoolean(PREF_LOCATION_DATA, false);
-
 
         switch (watermarkOption) {
             case "timestamp":
@@ -1311,7 +1301,6 @@ public class HomeFragment extends Fragment {
                 // Notify the adapter to update the thumbnail
                 File latestVideo = getLatestVideoFile();
                 if (latestVideo != null) {
-                    String videoFilePath = latestVideo.getAbsolutePath();
 
                 }
 
@@ -1320,25 +1309,6 @@ public class HomeFragment extends Fragment {
             }
         });
     }
-
-
-
-
-
-
-    private String getCurrentTimestamp() {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MMM/yyyy hh-mm a", Locale.getDefault());
-        return sdf.format(new Date());
-    }
-
-
-
-
-
-
-
-
-
 
 
     private String getWatermarkOption() {

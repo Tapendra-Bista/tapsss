@@ -100,7 +100,6 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
     private void setThumbnail(RecordViewHolder holder, File video) {
         Glide.with(context)
                 .load(video.getAbsolutePath())
-                .placeholder(R.drawable.ic_video_placeholder)
                 .into(holder.imageViewThumbnail);
     }
 

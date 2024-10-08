@@ -124,9 +124,7 @@ public class RecordingService extends Service {
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
                 manager.createNotificationChannel(serviceChannel);
-                Log.d(TAG, "Notification channel created");
-            } else {
-                Log.e(TAG, "NotificationManager is null, unable to create notification channel");
+
             }
         }
     }

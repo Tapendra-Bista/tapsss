@@ -29,8 +29,7 @@
                 android:layout_height="0px"
                 android:layout_gravity="bottom|end"
                 android:layout_margin="16dp"
-                android:contentDescription="@string/todo"
-                app:srcCompat="@drawable/ic_list" />
+                android:contentDescription="@string/todo"/>
 
 
         </LinearLayout>

@@ -7,10 +7,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
+
 import android.os.Bundle;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,8 +48,6 @@ public class SettingsFragment extends Fragment {
     private static final String QUALITY_FHD = "FHD";
     static final String PREF_LOCATION_DATA = "location_data";
 
-    private static final int REQUEST_PERMISSIONS = 1;
-    private static final String PREF_FIRST_LAUNCH = "first_launch";
 
 
     private void updateButtonAppearance(MaterialButton button, boolean isSelected) {
@@ -299,11 +296,6 @@ public class SettingsFragment extends Fragment {
     }
 
 
-
-    private void openUrl(String url) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        startActivity(intent);
-    }
 
 
 }
