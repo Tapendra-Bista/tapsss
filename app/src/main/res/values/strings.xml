@@ -1,49 +1,16 @@
 <resources>
     <string name="app_name">tapsss</string>
-    <string name="app_icon_description">tapsss app icon</string>
-    <string name="check_for_updates">Check for Updates</string>
-    <string name="fadsec_info">tapsss is part of the FadSec Lab suite. For more information, click on \'view source code\' below.</string>
 
-
-    <string name="app_description">
-    <![CDATA[
-    tapsss is an ad-free, open-source video recording app that prioritizes privacy by not tracking or collecting any data. It is available exclusively on GitHub and through the official links mentioned in the README.
-    <br/><br/>
-    tapsss has been featured in popular YouTube channels like <font color="#cfbafd">HowToMen</font> and <font color="#cfbafd">Xtream Droid</font>, as well as discussed in <font color="#cfbafd">GrapheneOS</font> and thirteen other notable spots.
-    ]]>
-</string>
-
-
-
-
-
-
-    <string name="view_source_code">View Source Code</string>
-    <string name="buy_me_a_coffee">Buy me a coffee ☕</string>
-    <string name="contact">Contact</string>
-    <string name="send_email">Send email</string>
-    <string name="join_community">Join community for help, sharing ideas, and future app updates</string>
-    <string name="privacy_information">Privacy Information</string>
-    <string name="copyright_info">© 2024 fadedhood.com\nLicensed under GPL-3.0</string>
     <string-array name="video_quality_array">
         <item name="quality_fhd">FHD (1920x1080)</item>
         <item name="quality_hd">HD (1280x720)</item>
         <item name="quality_sd">SD (640x480)</item>
     </string-array>
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <string name="back">Back</string>
     <string name="front">Front</string>
-    <string name="todo">TODO</string>
-    <string name="recording_tip">Recording Tip</string>
-    <string name="storage_0_gb_0_gb">Storage: 0 GB / 0 GB</string>
-    <string name="preview_area">Preview Area</string>
-    <string name="pause">Pause</string>
-    <string name="stats">Stats</string>
-    <string name="location_data">Location Data</string>
-    <string name="include_location_data_in_watermark_nrequires_gps_enabled_n_default_disabled">Include location data in watermark. \nRequires GPS enabled \n(Default: Disabled)</string>
-    <string name="privacy_info">Privacy Info</string>
-    <string name="checking_for_updates">Checking for updates…</string>
+
     <string name="delete">Delete</string>
     <string name="save_to_gallery">Save to Gallery</string>
+    <string name="todo">TODO</string>
 </resources>

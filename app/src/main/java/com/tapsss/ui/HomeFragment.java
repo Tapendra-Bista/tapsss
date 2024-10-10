@@ -3,8 +3,7 @@ package com.tapsss.ui;
 
 import android.Manifest;
 
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
+
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,7 +12,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
-import android.graphics.Color;
+
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -25,8 +24,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
+
 
 import android.util.Log;
 
@@ -105,7 +103,7 @@ public class HomeFragment extends Fragment {
     private boolean isPreviewEnabled = true;
 
     private View cardPreview;
-    private Vibrator vibrator;
+
 
 
 
@@ -183,64 +181,7 @@ public class HomeFragment extends Fragment {
 
 
     private void setupLongPressListener() {
-        cardPreview.setOnLongClickListener(v -> {
-            if (isRecording) {
-                // Start scaling down animation
-                cardPreview.animate()
-                        .scaleX(0.9f)
-                        .scaleY(0.9f)
-                        .setDuration(100) // Reduced duration for quicker scale-down
-                        .start();
-
-                // Perform haptic feedback
-                performHapticFeedback();
-
-                // Execute the task immediately
-                isPreviewEnabled = !isPreviewEnabled;
-                updatePreviewVisibility();
-                savePreviewState();
-
-
-
-                // Scale back up quickly with a wobble effect
-                cardPreview.postDelayed(() -> cardPreview.animate()
-                        .scaleX(1.0f)
-                        .scaleY(1.0f)
-                        .setDuration(50) // Shorter duration for quicker scale-up
-                        .start(), 60); // No Delay to ensure it happens after the initial scaling down
-
-            } else {
-                // Handling when recording is not active
-
-
-
-
-                // Ensure the placeholder is visible
-                tvPreviewPlaceholder.setVisibility(View.VISIBLE);
-                tvPreviewPlaceholder.setPadding(16, tvPreviewPlaceholder.getPaddingTop(), 16, tvPreviewPlaceholder.getPaddingBottom());
-                performHapticFeedback();
-
-                // Trigger the red blinking animation
-                tvPreviewPlaceholder.setBackgroundColor(Color.RED);
-                tvPreviewPlaceholder.postDelayed(() -> tvPreviewPlaceholder.setBackgroundColor(Color.TRANSPARENT), 100); // Blinking duration
-
-                // Wobble animation
-                ObjectAnimator scaleXUp = ObjectAnimator.ofFloat(tvPreviewPlaceholder, "scaleX", 1.1f);
-                ObjectAnimator scaleYUp = ObjectAnimator.ofFloat(tvPreviewPlaceholder, "scaleY", 1.1f);
-                ObjectAnimator scaleXDown = ObjectAnimator.ofFloat(tvPreviewPlaceholder, "scaleX", 1.0f);
-                ObjectAnimator scaleYDown = ObjectAnimator.ofFloat(tvPreviewPlaceholder, "scaleY", 1.0f);
-
-                scaleXUp.setDuration(50);
-                scaleYUp.setDuration(50);
-                scaleXDown.setDuration(50);
-                scaleYDown.setDuration(50);
-
-                AnimatorSet wobbleSet = new AnimatorSet();
-                wobbleSet.play(scaleXUp).with(scaleYUp).before(scaleXDown).before(scaleYDown);
-                wobbleSet.start();
-            }
-            return true;
-        });
+        cardPreview.setOnLongClickListener(v -> true);
     }
 
 
@@ -338,20 +279,8 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "onCreateView: Inflating fragment_home layout");
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
-    private void performHapticFeedback() {
-        if (vibrator != null && vibrator.hasVibrator()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE));
-            } else {
-                vibrator.vibrate(50);
-            }
-        }
-    }
-    private void savePreviewState() {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("isPreviewEnabled", isPreviewEnabled);
-        editor.apply();
-    }
+
+
 
 
     @Override
@@ -379,7 +308,7 @@ public class HomeFragment extends Fragment {
 
 
         cardPreview = view.findViewById(R.id.cardPreview);
-        vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
+
 
         sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE);
         isPreviewEnabled = sharedPreferences.getBoolean("isPreviewEnabled", true);
@@ -685,20 +614,22 @@ public class HomeFragment extends Fragment {
                 case QUALITY_SD:
                     mediaRecorder.setVideoSize(640, 480);
                     mediaRecorder.setVideoEncodingBitRate(1000000); // 1 Mbps
-                    mediaRecorder.setVideoFrameRate(30);
+                    mediaRecorder.setVideoFrameRate(90);
                     break;
                 case QUALITY_FHD:
                     mediaRecorder.setVideoSize(1920, 1080);
                     mediaRecorder.setVideoEncodingBitRate(10000000); // 10 Mbps
-                    mediaRecorder.setVideoFrameRate(30);
+                    mediaRecorder.setVideoFrameRate(90);
                     break;
                 default:
                     mediaRecorder.setVideoSize(1280, 720);
                     mediaRecorder.setVideoEncodingBitRate(5000000); // 5 Mbps
-                    mediaRecorder.setVideoFrameRate(30);
+                    mediaRecorder.setVideoFrameRate(90);
                     break;
             }
-
+            // Audio settings: high-quality audio
+            mediaRecorder.setAudioEncodingBitRate(384000);
+            mediaRecorder.setAudioSamplingRate(48000);
             mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
 

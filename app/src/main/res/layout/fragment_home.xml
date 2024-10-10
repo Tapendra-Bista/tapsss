@@ -7,21 +7,6 @@
     android:background="@color/black"
     android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/topAppBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/gray"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
-        app:titleCentered="true"
-        app:titleTextColor="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent">
-
-
-    </com.google.android.material.appbar.MaterialToolbar>
-
-
-
     <androidx.cardview.widget.CardView
         android:id="@+id/cardPreview"
         android:layout_width="match_parent"
@@ -51,7 +36,7 @@
                 android:layout_width="0px"
                 android:layout_height="0px"
                 android:layout_gravity="center"
-                android:text="@string/preview_area"
+                android:text=""
                 android:textColor="@color/material_on_surface_stroke"
                 android:textSize="24sp" />
 

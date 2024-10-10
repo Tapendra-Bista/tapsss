@@ -126,10 +126,4 @@ public class RecordsFragment extends Fragment implements RecordsAdapter.OnVideoC
     }
 
 
-
-
-    @Override
-    public void onVideoLongClick(File video, boolean isSelected) {
-
-    }
 }

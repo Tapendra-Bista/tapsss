@@ -66,7 +66,6 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
     }
 
     public interface OnVideoLongClickListener {
-        void onVideoLongClick(File video, boolean isSelected);
     }
 
     @NonNull
@@ -187,19 +186,17 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
         Uri itemUri = resolver.insert(Objects.requireNonNull(collection), values);
 
         if (itemUri != null) {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                try (InputStream in = Files.newInputStream(video.toPath());
-                     OutputStream out = resolver.openOutputStream(itemUri)) {
-                    byte[] buf = new byte[8192];
-                    int len;
-                    while ((len = in.read(buf)) > 0) {
-                        Objects.requireNonNull(out).write(buf, 0, len);
-                    }
-                    Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    Toast.makeText(context, "Failed to save", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
+            try (InputStream in = Files.newInputStream(video.toPath());
+                 OutputStream out = resolver.openOutputStream(itemUri)) {
+                byte[] buf = new byte[8192];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    Objects.requireNonNull(out).write(buf, 0, len);
                 }
+                Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                Toast.makeText(context, "Failed to save", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
             }
         } else {
             Toast.makeText(context, "Failed to save", Toast.LENGTH_SHORT).show();
