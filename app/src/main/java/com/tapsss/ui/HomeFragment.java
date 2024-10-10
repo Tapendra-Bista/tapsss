@@ -2,8 +2,7 @@ package com.tapsss.ui;
 
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
+
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
@@ -26,13 +25,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.StatFs;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.text.Html;
-import android.text.Spanned;
-import android.text.format.Formatter;
+
 import android.util.Log;
 
 import android.view.LayoutInflater;
@@ -48,7 +43,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -65,14 +59,13 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
-import android.os.SystemClock;
+
 
 
 import java.util.List;
-import java.util.Random;
+
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -82,16 +75,11 @@ public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
 
 
-
-    private long recordingStartTime;
-    private long videoBitrate;
-
-
     private File tempFileBeingProcessed;
 
-    private final Handler handler = new Handler();
-    private Runnable updateInfoRunnable;
-    private Runnable updateClockRunnable; // Declare here
+
+
+   // Declare here
 
     private CameraDevice cameraDevice;
     private CameraCaptureSession cameraCaptureSession;
@@ -110,7 +98,7 @@ public class HomeFragment extends Fragment {
     private static final String QUALITY_HD = "HD";
     private static final String QUALITY_FHD = "FHD";
 
-    private TextView tvStorageInfo;
+
     private TextView tvPreviewPlaceholder;
     private Button buttonStartStop;
 
@@ -119,29 +107,19 @@ public class HomeFragment extends Fragment {
     private View cardPreview;
     private Vibrator vibrator;
 
-    private CardView cardClock;
-    private TextView tvClock;
-
-
-    private TextView tvTip;
-    private final String[] tips = {
-            "1/11 | Long press preview to disable it.",
-
-    };
-
-
-
-    private int currentTipIndex = 0;
-
-    private TextView tvStats;
 
 
 
 
-    private List<String> messageQueue;
-    private List<String> recentlyShownMessages;
-    private final Random random = new Random();
-    private static final int RECENT_MESSAGE_LIMIT = 3; // Adjust as needed
+
+
+
+
+
+
+
+
+ // Adjust as needed
 
     private static final int REQUEST_PERMISSIONS = 1;
 
@@ -196,46 +174,6 @@ public class HomeFragment extends Fragment {
 
 
 
-    private void initializeMessages() {
-        messageQueue = new ArrayList<>(Arrays.asList(
-                "Alert! This is a restricted area. Start recording to gain access.",
-                "You’ve found the secret button! It does nothing lol",
-                "Hurry! The system is about to explode... or maybe it just needs a recording to calm down.",
-                "Well, this is awkward now...",
-                "What color is your Bugatti?",
-                "I was not programmed to do what you are doing. Wait, are you trying to hack me?"
-        ));
-        recentlyShownMessages = new ArrayList<>();
-        Collections.shuffle(messageQueue); // Shuffle the list initially
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void showRandomMessage() {
-        if (messageQueue == null || messageQueue.isEmpty()) {
-            initializeMessages(); // Reinitialize and shuffle if queue is empty or null
-        }
-
-        // Remove recently shown messages from the queue
-        messageQueue.removeAll(recentlyShownMessages);
-
-        // Ensure there are still messages to choose from
-        if (!messageQueue.isEmpty()) {
-            String randomMessage = messageQueue.remove(random.nextInt(messageQueue.size()));
-            tvPreviewPlaceholder.setText(randomMessage);
-
-            // Track recently shown messages
-            recentlyShownMessages.add(randomMessage);
-            if (recentlyShownMessages.size() > RECENT_MESSAGE_LIMIT) {
-                recentlyShownMessages.remove(0); // Remove the oldest message
-            }
-
-            // Shuffle the list again
-            Collections.shuffle(messageQueue);
-        } else {
-            // Fallback message if no messages are available
-            tvPreviewPlaceholder.setText("Oops! No messages available right now.");
-        }
-    }
 
 
 
@@ -274,8 +212,7 @@ public class HomeFragment extends Fragment {
             } else {
                 // Handling when recording is not active
 
-                // Show random funny message
-                showRandomMessage();
+
 
 
                 // Ensure the placeholder is visible
@@ -317,12 +254,12 @@ public class HomeFragment extends Fragment {
             } else {
                 textureView.setVisibility(View.INVISIBLE);
                 tvPreviewPlaceholder.setVisibility(View.VISIBLE);
-                tvPreviewPlaceholder.setText("Long press to enable preview");
+                tvPreviewPlaceholder.setText("");
             }
         } else {
             textureView.setVisibility(View.INVISIBLE);
             tvPreviewPlaceholder.setVisibility(View.VISIBLE);
-            tvPreviewPlaceholder.setText("Preview Area");
+            tvPreviewPlaceholder.setText("");
         }
 
         updateCameraPreview();
@@ -349,10 +286,7 @@ public class HomeFragment extends Fragment {
             }
         }
     }
-    private void resetTimers() {
-        recordingStartTime = SystemClock.elapsedRealtime();
-        updateStorageInfo();
-    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -426,23 +360,20 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "onViewCreated: Setting up UI components");
 
         textureView = view.findViewById(R.id.textureView);
-        tvStorageInfo = view.findViewById(R.id.tvStorageInfo);
+
         tvPreviewPlaceholder = view.findViewById(R.id.tvPreviewPlaceholder);
         buttonStartStop = view.findViewById(R.id.buttonStartStop);
 
-        tvTip = view.findViewById(R.id.tvTip);
-        tvStats = view.findViewById(R.id.tvStats);
-
-        // Initialize views
-        cardClock = view.findViewById(R.id.cardClock);
-        tvClock = view.findViewById(R.id.tvClock);
 
 
 
-        // Set up long press listener for clock widget
-        setupClockLongPressListener();
 
-        tvClock = view.findViewById(R.id.tvClock);
+
+
+
+
+
+
 
 
 
@@ -452,18 +383,16 @@ public class HomeFragment extends Fragment {
 
         sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE);
         isPreviewEnabled = sharedPreferences.getBoolean("isPreviewEnabled", true);
-        resetTimers();
+
         copyFontToInternalStorage();
-        updateStorageInfo();
-        updateTip();
+
+
         updateStats();
-        startUpdatingClock();
 
-        // Update clock and date initially
-        updateClock();
 
-        updateTip(); // Start the tip animation
-        startTipsAnimation();
+
+ // Start the tip animation
+
         setupButtonListeners();
         setupLongPressListener();
         updatePreviewVisibility();
@@ -512,255 +441,49 @@ public class HomeFragment extends Fragment {
 
 
     }
-    private void startUpdatingClock() {
-        updateClockRunnable = new Runnable() {
-            @Override
-            public void run() {
-                updateClock();
-                handler.postDelayed(this, 1000); // Update every second
-            }
-        };
-        handler.post(updateClockRunnable);
-    }
-    // Method to stop updating the clock
-    private void stopUpdatingClock() {
-        if (updateClockRunnable != null) {
-            handler.removeCallbacks(updateClockRunnable);
-            updateClockRunnable = null;
-        }
-    }
-
-    private void setupClockLongPressListener() {
-        cardClock.setOnLongClickListener(v -> {
-            addWobbleAnimation(); // This will perform the wobble animation
-            // This will show the dialog to choose display options
-            return true; // Indicate the long press was handled
-        });
-    }
-
-
-    private void addWobbleAnimation() {
-        // Define the scale down and scale up values
-        float scaleDown = 0.9f;
-        float scaleUp = 1.0f;
-
-        // Create animations for scaling down and scaling up
-        AnimatorSet scaleDownSet = new AnimatorSet();
-        scaleDownSet.playTogether(
-                ObjectAnimator.ofFloat(cardClock, "scaleX", scaleDown),
-                ObjectAnimator.ofFloat(cardClock, "scaleY", scaleDown)
-        );
-        scaleDownSet.setDuration(50); // Duration for scale down
-
-        AnimatorSet scaleUpSet = new AnimatorSet();
-        scaleUpSet.playTogether(
-                ObjectAnimator.ofFloat(cardClock, "scaleX", scaleUp),
-                ObjectAnimator.ofFloat(cardClock, "scaleY", scaleUp)
-        );
-        scaleUpSet.setDuration(70); // Duration for scale up
-
-        AnimatorSet scaleBackSet = new AnimatorSet();
-        scaleBackSet.playTogether(
-                ObjectAnimator.ofFloat(cardClock, "scaleX", 1.0f),
-                ObjectAnimator.ofFloat(cardClock, "scaleY", 1.0f)
-        );
-        scaleBackSet.setDuration(70); // Duration to snap back to original size
-
-        // Start the animation sequence
-        scaleDownSet.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                // Start scaling up animation after scaling down
-                scaleUpSet.start();
-                performHapticFeedback();
-            }
-        });
-
-        scaleUpSet.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                // Start scaling back to original size after scaling up
-                scaleBackSet.start();
-            }
-        });
-
-        // Start the sequence with scaling down
-        scaleDownSet.start();
-    }
-
-
-    // Method to update the clock and dates
-    private void updateClock() {
-        // Default to "Everything"
-
-        // Update the time
-        SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-        String currentTime = timeFormat.format(new Date());
-        tvClock.setText(currentTime);
 
 
 
 
 
 
-    }
 
 
 
 
-    private void updateStorageInfo() {
-        Log.d(TAG, "updateStorageInfo: Updating storage information");
-        StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-        long bytesAvailable = stat.getAvailableBytes();
-        long bytesTotal = stat.getTotalBytes();
 
-        double gbAvailable;
-        double gbTotal = bytesTotal / (1024.0 * 1024.0 * 1024.0);
 
-        long elapsedTime = SystemClock.elapsedRealtime() - recordingStartTime;
-        long estimatedBytesUsed = (elapsedTime * videoBitrate) / 8000; // Convert ms and bits to bytes
 
-        // Update available space based on estimated bytes used
-        bytesAvailable -= estimatedBytesUsed;
-        gbAvailable = Math.max(0, bytesAvailable / (1024.0 * 1024.0 * 1024.0));
 
-        long remainingTime = (videoBitrate > 0) ? (bytesAvailable * 8) / videoBitrate : 0;
 
-        // Calculate days, hours, minutes, and seconds for remaining time
-        long days = remainingTime / (24 * 3600);
-        long hours = (remainingTime % (24 * 3600)) / 3600;
-        long minutes = (remainingTime % 3600) / 60;
-        long seconds = remainingTime % 60;
 
-        String storageInfo = String.format(Locale.getDefault(),
-                "<font color='#FFFFFF' style='font-size:16sp;'><b>Available:</b></font><br>" +
-                        "<font color='#CCCCCC' style='font-size:14sp;'>%.2f GB / %.2f GB</font><br><br>" +
-                        "<font color='#FFFFFF' style='font-size:16sp;'><b>Record time (est.):</b></font><br>" +
-                        "<font color='#CCCCCC' style='font-size:14sp;'>FHD: %s<br>HD: %s<br>SD: %s</font><br><br>" +
-                        "<font color='#FFFFFF' style='font-size:16sp;'><b>Elapsed time:</b></font><br>" +
-                        "<font color='#77DD77' style='font-size:14sp;'>%02d:%02d</font><br>" +
-                        "<font color='#FFFFFF' style='font-size:16sp;'><b>Remaining time:</b></font><br>" +
-                        "<font color='#E43C3C' style='font-size:14sp;'>%s</font>",
-                gbAvailable, gbTotal,
-                getRecordingTimeEstimate(bytesAvailable, 10 * 1024 * 1024),
-                getRecordingTimeEstimate(bytesAvailable, 5 * 1024 * 1024),
-                getRecordingTimeEstimate(bytesAvailable, 1024 * 1024),
-                elapsedTime / 60000, (elapsedTime / 1000) % 60,
-                formatRemainingTime(days, hours, minutes, seconds)
-        );
 
-        Spanned formattedText = Html.fromHtml(storageInfo, Html.FROM_HTML_MODE_LEGACY);
 
-        // Update UI on the main thread
-        if (getActivity() != null) {
-            getActivity().runOnUiThread(() -> tvStorageInfo.setText(formattedText));
-        }
-    }
 
-    private String formatRemainingTime(long days, long hours, long minutes, long seconds) {
-        StringBuilder remainingTime = new StringBuilder();
-        if (days > 0) {
-            remainingTime.append(String.format(Locale.getDefault(), "<font color='#E43C3C'>%d</font><font color='#CCCCCC'>days</font> ", days));
-        }
-        if (hours > 0) {
-            remainingTime.append(String.format(Locale.getDefault(), "<font color='#E43C3C'>%d</font><font color='#CCCCCC'>h</font> ", hours));
-        }
-        if (minutes > 0) {
-            remainingTime.append(String.format(Locale.getDefault(), "<font color='#E43C3C'>%d</font><font color='#CCCCCC'>m</font> ", minutes));
-        }
-        if (seconds > 0 || remainingTime.length() == 0) {
-            remainingTime.append(String.format(Locale.getDefault(), "<font color='#E43C3C'>%d</font><font color='#CCCCCC'>s</font>", seconds));
-        }
-        return remainingTime.toString();
-    }
 
-    private String getRecordingTimeEstimate(long availableBytes, long bitrate) {
-        long recordingSeconds = (availableBytes * 8) / bitrate;
-        long recordingHours = recordingSeconds / 3600;
-        long recordingMinutes = (recordingSeconds % 3600) / 60;
-        return String.format(Locale.getDefault(), "%d h %d min", recordingHours, recordingMinutes);
-    }
 
-//    update storage and stats in real time while recording is started
-    private void startUpdatingInfo() {
-        Log.d(TAG, "startUpdatingInfo: Beginning real-time updates");
-        updateInfoRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (isRecording) {
-                    updateStorageInfo();
-                    updateStats();
-                    handler.postDelayed(this, 3000); // Update every 3 seconds
-                }
-            }
-        };
-        handler.post(updateInfoRunnable);
-    }
 
-    private void stopUpdatingInfo() {
-        Log.d(TAG, "stopUpdatingInfo: Stopping real-time updates");
-        if (updateInfoRunnable != null) {
-            handler.removeCallbacks(updateInfoRunnable);
-            updateInfoRunnable = null;
-        }
-    }
-
-    private void startTipsAnimation() {
-        if (tips.length > 0) {
-            animateTip(tips[currentTipIndex], tvTip); // Adjust delay as needed
-        }
-    }
-    private void updateTip() {
-        //        animateTip(); this line is giving errors so i commented it
-    }
-    private void animateTip(String fullText, TextView textView) {
-        final Handler handler = new Handler(Looper.getMainLooper());
-        final int[] index = {0};
-
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                if (index[0] <= fullText.length()) {
-                    textView.setText(fullText.substring(0, index[0]));
-                    index[0]++;
-                    handler.postDelayed(this, 40); // add delay in typing the tips
-                } else {
-                    currentTipIndex = (currentTipIndex + 1) % tips.length;
-                    handler.postDelayed(() -> animateTip(tips[currentTipIndex], textView), 5000); // Wait 2 seconds before next tip
-                }
-            }
-        };
-
-        handler.post(runnable);
-    }
 
 
     private void updateStats() {
         Log.d(TAG, "updateStats: Updating video statistics");
         File recordsDir = new File(requireContext().getExternalFilesDir(null), "tapsss");
-        int numVideos = 0;
-        long totalSize = 0;
+
 
         if (recordsDir.exists()) {
             File[] files = recordsDir.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if (file.isFile() && file.getName().endsWith(".mp4")) {
-                        numVideos++;
-                        totalSize += file.length();
+                    if (file.isFile()) {
+                        file.getName();
                     }
                 }
             }
         }
 
-        String statsText = String.format(Locale.getDefault(),
-                "<font color='#FFFFFF' style='font-size:12sp;'><b>Videos: </b></font>" +
-                        "<font color='#D3D3D3' style='font-size:11sp;'>%d</font><br>" +
-                        "<font color='#FFFFFF' style='font-size:12sp;'><b>Used Space:</b></font><br>" +
-                        "<font color='#D3D3D3' style='font-size:11sp;'>%s</font>",
-                numVideos, Formatter.formatFileSize(getContext(), totalSize));
 
-        tvStats.setText(Html.fromHtml(statsText, Html.FROM_HTML_MODE_LEGACY));
+
+
     }
 
 
@@ -792,13 +515,13 @@ public class HomeFragment extends Fragment {
 
         // Set up the camera and MediaRecorder here
         if (!isRecording) {
-            resetTimers();
+
             if (cameraDevice == null) {
                 openCamera();
             } else {
                 startRecordingVideo();
             }
-            recordingStartTime = SystemClock.elapsedRealtime();
+
             setVideoBitrate();
 
             buttonStartStop.setText("");
@@ -807,7 +530,7 @@ public class HomeFragment extends Fragment {
             tvPreviewPlaceholder.setVisibility(View.GONE);
             textureView.setVisibility(View.VISIBLE);
 
-            startUpdatingInfo();
+
             isRecording = true;
             updatePreviewVisibility();
 
@@ -824,6 +547,7 @@ public class HomeFragment extends Fragment {
 
     private void setVideoBitrate() {
         String selectedQuality = sharedPreferences.getString(PREF_VIDEO_QUALITY, QUALITY_HD);
+        long videoBitrate;
         switch (selectedQuality) {
             case QUALITY_SD:
                 videoBitrate = 1000000; // 1 Mbps
@@ -1065,8 +789,8 @@ public class HomeFragment extends Fragment {
 
                 tvPreviewPlaceholder.setVisibility(View.VISIBLE);
                 textureView.setVisibility(View.INVISIBLE);
-                stopUpdatingInfo();
-                updateStorageInfo();
+
+
             } catch (CameraAccessException | IllegalStateException e) {
                 Log.e(TAG, "stopRecording: Error stopping recording", e);
                 e.printStackTrace();
@@ -1261,8 +985,7 @@ public class HomeFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         Log.d(TAG, "onDestroyView: Cleaning up resources");
-        stopUpdatingInfo();
-        stopUpdatingClock();
+
         releaseCamera();
     }
 }
