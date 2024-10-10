@@ -15,11 +15,10 @@ import androidx.annotation.NonNull;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
+
 import androidx.recyclerview.widget.RecyclerView;
 import com.tapsss.R;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +30,6 @@ public class RecordsFragment extends Fragment implements RecordsAdapter.OnVideoC
 
     private RecyclerView recyclerView;
     private RecordsAdapter adapter;
-    private boolean isGridView = true;
-    private FloatingActionButton fabToggleView;
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor(); // Executor for background tasks
 
@@ -65,23 +62,13 @@ public class RecordsFragment extends Fragment implements RecordsAdapter.OnVideoC
     }
 
     private void setLayoutManager() {
-        RecyclerView.LayoutManager layoutManager = isGridView ?
-                new GridLayoutManager(getContext(), 2) :
-                new LinearLayoutManager(getContext());
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
         recyclerView.setLayoutManager(layoutManager);
     }
 
-    private void setupFabListeners() {
 
 
-    }
 
-    private void toggleViewMode() {
-
-        isGridView = !isGridView;
-        setLayoutManager();
-
-    }
 
 
 
