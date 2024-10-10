@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@color/black"
+    android:background="@color/white"
     android:layout_height="match_parent">
 
     <com.google.android.material.appbar.MaterialToolbar
@@ -255,15 +255,7 @@
 
             tools:ignore="SpeakableTextPresentCheck,VisualLintButtonSize" />
 
-        <Button
-            android:id="@+id/buttonPauseResume"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="0px"
-            android:layout_height="0px"
-            android:layout_marginStart="8dp"
 
-            android:enabled="false"
-            android:text="@string/pause" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

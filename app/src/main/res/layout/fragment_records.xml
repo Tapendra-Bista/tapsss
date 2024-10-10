@@ -23,15 +23,6 @@
                 android:layout_height="700dp"
                 android:layout_marginTop="700dp" />
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fab_toggle_view"
-                android:layout_width="0px"
-                android:layout_height="0px"
-                android:layout_gravity="bottom|end"
-                android:layout_margin="16dp"
-                android:contentDescription="@string/todo"/>
-
-
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

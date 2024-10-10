@@ -42,12 +42,12 @@ public class RecordsFragment extends Fragment implements RecordsAdapter.OnVideoC
         setHasOptionsMenu(true);
 
         recyclerView = view.findViewById(R.id.recycler_view_records);
-        fabToggleView = view.findViewById(R.id.fab_toggle_view);
+
 
 
 
         setupRecyclerView();
-        setupFabListeners();
+
 
         return view;
     }
@@ -72,7 +72,7 @@ public class RecordsFragment extends Fragment implements RecordsAdapter.OnVideoC
     }
 
     private void setupFabListeners() {
-        fabToggleView.setOnClickListener(v -> toggleViewMode());
+
 
     }
 

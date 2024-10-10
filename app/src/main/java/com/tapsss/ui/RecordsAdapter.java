@@ -1,6 +1,5 @@
 package com.tapsss.ui;
 
-import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -228,28 +227,6 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
             e.printStackTrace();
         }
     }
-
-
-
-
-
-
-
-
-    @SuppressLint("NotifyDataSetChanged")
-    private void renameVideo(int position, String newName) {
-        if (videoFiles == null || position < 0 || position >= videoFiles.size()) {
-            Toast.makeText(context, "Invalid position or video list is null", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-    }
-
-
-
-
-
-
 
 
     static class RecordViewHolder extends RecyclerView.ViewHolder {

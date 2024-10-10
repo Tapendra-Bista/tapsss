@@ -5,8 +5,6 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.viewpager2.widget.ViewPager2;
 import android.os.Bundle;
 
-
-
 import android.view.Window;
 import android.view.WindowManager;
 

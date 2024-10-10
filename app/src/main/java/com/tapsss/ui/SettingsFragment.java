@@ -1,12 +1,11 @@
 package com.tapsss.ui;
 
 
-import android.Manifest;
+
 import android.content.Context;
-import android.content.Intent;
+
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 
 import android.os.Bundle;
 
@@ -18,8 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+
 import androidx.fragment.app.Fragment;
 
 
@@ -27,10 +25,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import com.tapsss.R;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.materialswitch.MaterialSwitch;
 
-import java.util.Objects;
 
 public class SettingsFragment extends Fragment {
 
@@ -40,7 +35,7 @@ public class SettingsFragment extends Fragment {
 
     private static final String PREF_CAMERA_SELECTION = "camera_selection";
     private static final String PREF_VIDEO_QUALITY = "video_quality";
-    private static final String PREF_WATERMARK_OPTION = "watermark_option";
+
     private static final String CAMERA_FRONT = "front";
     private static final String CAMERA_BACK = "back";
     private static final String QUALITY_SD = "SD";
@@ -71,10 +66,6 @@ public class SettingsFragment extends Fragment {
         sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE);
 
 
-
-
-
-
         MaterialButtonToggleGroup cameraSelectionToggle = view.findViewById(R.id.camera_selection_toggle);
         // Setup spinner items with array resource
         Spinner qualitySpinner = view.findViewById(R.id.quality_spinner);
@@ -90,76 +81,8 @@ public class SettingsFragment extends Fragment {
         setupQualitySpinner(view, qualitySpinner);
 
 
-
-
-//        // Set up location toggle group
-//        MaterialButtonToggleGroup locationToggleGroup = view.findViewById(R.id.location_toggle_group);
-//        setupLocationToggle(view, locationToggleGroup);
-
-        MaterialSwitch locationSwitch = view.findViewById(R.id.location_toggle_group);
-        setupLocationSwitch(locationSwitch);
-
-
-
         return view;
     }
-
-
-
-    private void setupLocationSwitch(MaterialSwitch locationSwitch) {
-        boolean isLocationEnabled = sharedPreferences.getBoolean(PREF_LOCATION_DATA, false);
-        locationSwitch.setChecked(isLocationEnabled);
-
-        locationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    showLocationPermissionDialog(locationSwitch);
-                } else {
-                    sharedPreferences.edit().putBoolean(PREF_LOCATION_DATA, true).apply();
-                }
-            } else {
-                sharedPreferences.edit().putBoolean(PREF_LOCATION_DATA, false).apply();
-            }
-
-        });
-    }
-
-
-    private void showLocationPermissionDialog(MaterialSwitch locationSwitch) {
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Location Permission")
-                .setMessage("This app needs location permission to add location data to videos. Please grant the permission.")
-                .setPositiveButton("Grant", (dialog, which) -> requestLocationPermission())
-                .setNegativeButton("Cancel", (dialog, which) -> {
-                    locationSwitch.setChecked(false); // Disable the switch if the user cancels
-                    sharedPreferences.edit().putBoolean(PREF_LOCATION_DATA, false).apply();
-                    dialog.dismiss();
-                })
-                .show();
-    }
-    private void requestLocationPermission() {
-        ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
-    }
-
-
-    private void setupLocationToggle(View view, MaterialSwitch locationSwitch) {
-        boolean isLocationEnabled = sharedPreferences.getBoolean(PREF_LOCATION_DATA, false);
-        locationSwitch.setChecked(isLocationEnabled);
-
-
-
-
-        locationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            sharedPreferences.edit().putBoolean(PREF_LOCATION_DATA, isChecked).apply();
-            if (isChecked) {
-                requestLocationPermission();
-            }
-
-        });
-    }
-
-
     private static final int REQUEST_LOCATION_PERMISSION = 1;
 
 
@@ -170,10 +93,7 @@ public class SettingsFragment extends Fragment {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 sharedPreferences.edit().putBoolean(PREF_LOCATION_DATA, true).apply();
             } else {
-                MaterialSwitch locationSwitch = requireView().findViewById(R.id.location_toggle_group);
-                if (locationSwitch != null) {
-                    locationSwitch.setChecked(false);
-                }
+
                 sharedPreferences.edit().putBoolean(PREF_LOCATION_DATA, false).apply();
             }
         }
@@ -254,46 +174,11 @@ public class SettingsFragment extends Fragment {
         });
     }
 
-    private void setupWatermarkSpinner(View view, Spinner watermarkSpinner) {
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(requireContext(),
-                R.array.watermark_options, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        watermarkSpinner.setAdapter(adapter);
-
-        SharedPreferences sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE);
-        String savedWatermark = sharedPreferences.getString(PREF_WATERMARK_OPTION, "timestamp_tapsss");
-        int watermarkIndex = getWatermarkIndex(savedWatermark);
-        watermarkSpinner.setSelection(watermarkIndex);
-
-        watermarkSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedWatermark = getWatermarkValue(position);
-                sharedPreferences.edit().putString(PREF_WATERMARK_OPTION, selectedWatermark).apply();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Do nothing
-            }
-        });
-    }
 
 
-    private int getWatermarkIndex(String value) {
-        String[] values = getResources().getStringArray(R.array.watermark_values);
-        for (int i = 0; i < values.length; i++) {
-            if (values[i].equals(value)) {
-                return i;
-            }
-        }
-        return 0; // Default to first option
-    }
 
-    private String getWatermarkValue(int index) {
-        String[] values = getResources().getStringArray(R.array.watermark_values);
-        return values[2];
-    }
+
+
 
 
 

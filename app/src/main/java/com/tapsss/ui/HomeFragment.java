@@ -117,8 +117,7 @@ public class HomeFragment extends Fragment {
     private TextView tvStorageInfo;
     private TextView tvPreviewPlaceholder;
     private Button buttonStartStop;
-    private Button buttonPauseResume;
-    private boolean isPaused = false;
+
     private boolean isPreviewEnabled = true;
 
     private View cardPreview;
@@ -322,12 +321,12 @@ public class HomeFragment extends Fragment {
             } else {
                 textureView.setVisibility(View.INVISIBLE);
                 tvPreviewPlaceholder.setVisibility(View.VISIBLE);
-                tvPreviewPlaceholder.setText("Long press to enable preview");
+                tvPreviewPlaceholder.setText("");
             }
         } else {
             textureView.setVisibility(View.INVISIBLE);
             tvPreviewPlaceholder.setVisibility(View.VISIBLE);
-            tvPreviewPlaceholder.setText("Preview Area");
+            tvPreviewPlaceholder.setText("");
         }
 
         updateCameraPreview();
@@ -434,7 +433,7 @@ public class HomeFragment extends Fragment {
         tvStorageInfo = view.findViewById(R.id.tvStorageInfo);
         tvPreviewPlaceholder = view.findViewById(R.id.tvPreviewPlaceholder);
         buttonStartStop = view.findViewById(R.id.buttonStartStop);
-        buttonPauseResume = view.findViewById(R.id.buttonPauseResume);
+
         tvTip = view.findViewById(R.id.tvTip);
         tvStats = view.findViewById(R.id.tvStats);
 
@@ -489,13 +488,7 @@ public class HomeFragment extends Fragment {
         return cameraGranted && recordAudioGranted && storageGranted;
     }
 
-    private void showPermissionsInfoDialog() {
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Permissions Required")
-                .setMessage("This app needs camera, microphone, and storage permissions to function properly. Please enable these permissions from the app settings.")
-                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                .show();
-    }
+
 
     private void debugPermissionsStatus() {
         Log.d(TAG, "Camera permission: " +
@@ -523,18 +516,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        buttonPauseResume.setOnClickListener(v -> {
-            if (isRecording) {
-                if (isPaused) {
 
-
-                    resumeRecording();
-                } else {
-
-                    pauseRecording();
-                }
-            }
-        });
     }
     private void startUpdatingClock() {
         updateClockRunnable = new Runnable() {
@@ -640,12 +622,6 @@ public class HomeFragment extends Fragment {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt("display_option", option);
         editor.apply();
-    }
-
-
-    private void showOptionsAndAnimate() {
-        addWobbleAnimation();
-        showDisplayOptionsDialog();
     }
 
 
@@ -836,42 +812,21 @@ public class HomeFragment extends Fragment {
         tvStats.setText(Html.fromHtml(statsText, Html.FROM_HTML_MODE_LEGACY));
     }
 
-    @SuppressLint("SetTextI18n")
-    private void pauseRecording() {
-        Log.d(TAG, "pauseRecording: Pausing video recording");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            mediaRecorder.pause();
-            isPaused = true;
-            buttonPauseResume.setText("Resume");
-
-        }
-    }
-
-    private void resumeRecording() {
-        Log.d(TAG, "resumeRecording: Resuming video recording");
-        mediaRecorder.resume();
-        isPaused = false;
-        buttonPauseResume.setText("");
-
-    }
-
-
 
     private final BroadcastReceiver recordingStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if ("RECORDING_STATE_CHANGED".equals(intent.getAction())) {
                 boolean isRecording = intent.getBooleanExtra("isRecording", false);
+                buttonStartStop.setText("");
                 if (isRecording) {
-                    buttonStartStop.setText("");
 
-                    buttonPauseResume.setEnabled(true);
+
                     tvPreviewPlaceholder.setVisibility(View.GONE);
                     textureView.setVisibility(View.VISIBLE);
                 } else {
-                    buttonStartStop.setText("");
 
-                    buttonPauseResume.setEnabled(false);
+
                     tvPreviewPlaceholder.setVisibility(View.VISIBLE);
                     textureView.setVisibility(View.GONE);
                 }
@@ -897,7 +852,7 @@ public class HomeFragment extends Fragment {
 
             buttonStartStop.setText("");
 
-            buttonPauseResume.setEnabled(true);
+
             tvPreviewPlaceholder.setVisibility(View.GONE);
             textureView.setVisibility(View.VISIBLE);
 
@@ -1086,17 +1041,6 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private String extractTimestamp(String filename) {
-        // Assuming filename format is "prefix_TIMESTAMP.mp4"
-        // Example: "temp_20240730_01_39_26PM.mp4"
-        // Extracting timestamp part: "20240730_01_39_26PM"
-        int startIndex = filename.indexOf('_') + 1;
-        int endIndex = filename.lastIndexOf('.');
-        return filename.substring(startIndex, endIndex);
-    }
-
-
-
 
     private void checkAndDeleteSpecificTempFile() {
         if (tempFileBeingProcessed != null) {
@@ -1168,7 +1112,6 @@ public class HomeFragment extends Fragment {
                 isRecording = false;
                 buttonStartStop.setText("");
 
-                buttonPauseResume.setEnabled(false);
                 tvPreviewPlaceholder.setVisibility(View.VISIBLE);
                 textureView.setVisibility(View.INVISIBLE);
                 stopUpdatingInfo();
@@ -1298,11 +1241,8 @@ public class HomeFragment extends Fragment {
                 //  monitoring temp files
                 startMonitoring();
 
-                // Notify the adapter to update the thumbnail
-                File latestVideo = getLatestVideoFile();
-                if (latestVideo != null) {
 
-                }
+
 
             } else {
                 Log.e(TAG, "Failed to add watermark: " + session.getFailStackTrace());
