@@ -56,7 +56,7 @@ import androidx.fragment.app.Fragment;
 import com.arthenica.ffmpegkit.FFmpegKit;
 import com.tapsss.R;
 import com.tapsss.RecordingService;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,10 +69,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import android.os.SystemClock;
-import java.time.format.DateTimeFormatter;
-import java.time.chrono.HijrahChronology;
-import java.time.chrono.HijrahDate;
-
 
 
 import java.util.List;
@@ -124,7 +120,7 @@ public class HomeFragment extends Fragment {
     private Vibrator vibrator;
 
     private CardView cardClock;
-    private TextView tvClock, tvDateEnglish, tvDateArabic;
+    private TextView tvClock;
 
 
     private TextView tvTip;
@@ -321,12 +317,12 @@ public class HomeFragment extends Fragment {
             } else {
                 textureView.setVisibility(View.INVISIBLE);
                 tvPreviewPlaceholder.setVisibility(View.VISIBLE);
-                tvPreviewPlaceholder.setText("");
+                tvPreviewPlaceholder.setText("Long press to enable preview");
             }
         } else {
             textureView.setVisibility(View.INVISIBLE);
             tvPreviewPlaceholder.setVisibility(View.VISIBLE);
-            tvPreviewPlaceholder.setText("");
+            tvPreviewPlaceholder.setText("Preview Area");
         }
 
         updateCameraPreview();
@@ -440,15 +436,15 @@ public class HomeFragment extends Fragment {
         // Initialize views
         cardClock = view.findViewById(R.id.cardClock);
         tvClock = view.findViewById(R.id.tvClock);
-        tvDateEnglish = view.findViewById(R.id.tvDateEnglish);
-        tvDateArabic = view.findViewById(R.id.tvDateArabic);
+
+
 
         // Set up long press listener for clock widget
         setupClockLongPressListener();
 
         tvClock = view.findViewById(R.id.tvClock);
-        tvDateEnglish = view.findViewById(R.id.tvDateEnglish);
-        tvDateArabic = view.findViewById(R.id.tvDateArabic);
+
+
 
 
         cardPreview = view.findViewById(R.id.cardPreview);
@@ -487,8 +483,6 @@ public class HomeFragment extends Fragment {
 
         return cameraGranted && recordAudioGranted && storageGranted;
     }
-
-
 
     private void debugPermissionsStatus() {
         Log.d(TAG, "Camera permission: " +
@@ -539,7 +533,7 @@ public class HomeFragment extends Fragment {
     private void setupClockLongPressListener() {
         cardClock.setOnLongClickListener(v -> {
             addWobbleAnimation(); // This will perform the wobble animation
-            showDisplayOptionsDialog(); // This will show the dialog to choose display options
+            // This will show the dialog to choose display options
             return true; // Indicate the long press was handled
         });
     }
@@ -595,63 +589,20 @@ public class HomeFragment extends Fragment {
     }
 
 
-
-    private void showDisplayOptionsDialog() {
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Choose Clock Display")
-                .setSingleChoiceItems(new String[]{
-                        "Time Only",
-                        "English Date with Time",
-                        "تاريخ التقويم الإسلامي"
-                }, getCurrentDisplayOption(), (dialog, which) -> {
-                    saveDisplayOption(which);
-                    updateClock(); // Update the widget based on the selected option
-                    dialog.dismiss();
-                })
-                .setPositiveButton("OK", null)
-                .show();
-    }
-
-    private int getCurrentDisplayOption() {
-        SharedPreferences prefs = requireActivity().getSharedPreferences("AppPreferences", Context.MODE_PRIVATE);
-        return prefs.getInt("display_option", 2); // Default to "Everything"
-    }
-
-    private void saveDisplayOption(int option) {
-        SharedPreferences prefs = requireActivity().getSharedPreferences("AppPreferences", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt("display_option", option);
-        editor.apply();
-    }
-
-
     // Method to update the clock and dates
     private void updateClock() {
-        SharedPreferences prefs = requireActivity().getSharedPreferences("AppPreferences", Context.MODE_PRIVATE);
-        int displayOption = prefs.getInt("display_option", 2); // Default to "Everything"
+        // Default to "Everything"
 
         // Update the time
         SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
         String currentTime = timeFormat.format(new Date());
         tvClock.setText(currentTime);
 
-        // Update the date in English
-        SimpleDateFormat dateFormatEnglish = new SimpleDateFormat("EEE, MMM d", Locale.getDefault());
-        String currentDateEnglish = dateFormatEnglish.format(new Date());
 
-        // Update the date in Arabic (Islamic calendar)
-        String currentDateArabic = "N/A";
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            HijrahDate hijrahDate = HijrahChronology.INSTANCE.dateNow();
-            DateTimeFormatter dateFormatterArabic = DateTimeFormatter.ofPattern("d MMMM yyyy", new Locale("ar"));
-            currentDateArabic = dateFormatterArabic.format(hijrahDate);
-        }
 
-        // Set text visibility based on user choice
-        tvDateEnglish.setText(displayOption == 1 || displayOption == 2 ? currentDateEnglish : "");
-        tvDateEnglish.setPadding(5, tvPreviewPlaceholder.getPaddingTop(), 5, tvPreviewPlaceholder.getPaddingBottom());
 
-        tvDateArabic.setText(displayOption == 2 ? currentDateArabic : "");
+
+
     }
 
 
@@ -1241,8 +1192,7 @@ public class HomeFragment extends Fragment {
                 //  monitoring temp files
                 startMonitoring();
 
-
-
+                // Notify the adapter to update the thumbnail
 
             } else {
                 Log.e(TAG, "Failed to add watermark: " + session.getFailStackTrace());

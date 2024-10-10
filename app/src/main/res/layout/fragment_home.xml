@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@color/white"
+    android:background="@color/black"
     android:layout_height="match_parent">
 
     <com.google.android.material.appbar.MaterialToolbar
@@ -172,23 +172,8 @@
                         android:layout_gravity="top"
                         android:textColor="#FFFFFF" />
 
-                    <TextView
-                        android:id="@+id/tvDateEnglish"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:layout_gravity="left"
-                        android:textColor="#FFFFFF"
-                        tools:ignore="RtlHardcoded" />
 
-                    <TextView
-                        android:id="@+id/tvDateArabic"
-                        android:layout_width="wrap_content"
-                        android:layout_gravity="right"
-                        android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textColor="#FFFFFF"
-                        tools:ignore="RtlHardcoded" />
+
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -237,6 +222,7 @@
         android:id="@+id/layoutControls"
         style="?android:attr/buttonBarStyle"
         android:layout_width="399dp"
+        android:background="@android:color/holo_red_light"
         android:layout_height="250dp"
         android:layout_marginBottom="16dp"
         android:gravity="center"
