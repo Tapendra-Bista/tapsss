@@ -5,10 +5,9 @@ import android.Manifest;
 
 
 import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -190,16 +189,16 @@ public class HomeFragment extends Fragment {
     private void updatePreviewVisibility() {
         if (isRecording) {
             if (isPreviewEnabled) {
-                textureView.setVisibility(View.VISIBLE);
-                tvPreviewPlaceholder.setVisibility(View.GONE);
+                textureView.setVisibility(View.INVISIBLE);
+                tvPreviewPlaceholder.setVisibility(View.INVISIBLE);
             } else {
                 textureView.setVisibility(View.INVISIBLE);
-                tvPreviewPlaceholder.setVisibility(View.VISIBLE);
+                tvPreviewPlaceholder.setVisibility(View.INVISIBLE);
                 tvPreviewPlaceholder.setText("");
             }
         } else {
             textureView.setVisibility(View.INVISIBLE);
-            tvPreviewPlaceholder.setVisibility(View.VISIBLE);
+            tvPreviewPlaceholder.setVisibility(View.INVISIBLE);
             tvPreviewPlaceholder.setText("");
         }
 
@@ -247,30 +246,10 @@ public class HomeFragment extends Fragment {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-    @Override
-    public void onResume() {
-        super.onResume();
 
 
-        Log.d(TAG, "HomeFragment resumed.");
-
-        IntentFilter filter = new IntentFilter("RECORDING_STATE_CHANGED");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            requireActivity().registerReceiver(recordingStateReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
-        }
-
-        updateStats();
-    }
 
 
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        Log.d(TAG, "HomeFragment paused.");
-
-        requireActivity().unregisterReceiver(recordingStateReceiver);
-    }
 
 
     @Nullable
@@ -416,26 +395,7 @@ public class HomeFragment extends Fragment {
     }
 
 
-    private final BroadcastReceiver recordingStateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if ("RECORDING_STATE_CHANGED".equals(intent.getAction())) {
-                boolean isRecording = intent.getBooleanExtra("isRecording", false);
-                buttonStartStop.setText("");
-                if (isRecording) {
 
-
-                    tvPreviewPlaceholder.setVisibility(View.GONE);
-                    textureView.setVisibility(View.VISIBLE);
-                } else {
-
-
-                    tvPreviewPlaceholder.setVisibility(View.VISIBLE);
-                    textureView.setVisibility(View.GONE);
-                }
-            }
-        }
-    };
 
 
 

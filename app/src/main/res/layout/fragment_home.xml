@@ -18,18 +18,17 @@
         app:layout_constraintBottom_toTopOf="@id/layoutControls"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-
-        app:strokeColor="#4CAF50"
-        app:strokeWidth="15dp">
+>
 
         <FrameLayout
+
             android:layout_width="1dp"
             android:layout_height="1dp">
 
             <TextureView
                 android:id="@+id/textureView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_width="0.0000001dp"
+                android:layout_height="0.000001dp" />
 
             <TextView
                 android:id="@+id/tvPreviewPlaceholder"
