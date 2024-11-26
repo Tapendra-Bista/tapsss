@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.tapsss"
-    compileSdk = 34
+    compileSdk = 35
 
     splits {
         abi {
@@ -21,9 +21,9 @@ android {
     defaultConfig {
         applicationId = "com.tapsss"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 7
-        versionName = "1.1.1"
+        versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

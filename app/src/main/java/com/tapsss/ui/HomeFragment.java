@@ -35,7 +35,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -245,6 +245,7 @@ public class HomeFragment extends Fragment {
 
     }
 
+
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 
 
@@ -382,8 +383,8 @@ public class HomeFragment extends Fragment {
             File[] files = recordsDir.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if (file.isFile()) {
-                        file.getName();
+                    if (file.isFile() && file.getName().endsWith(".mp4")) {
+                        Log.d(TAG, "updateStats: "+file);
                     }
                 }
             }
@@ -538,7 +539,7 @@ public class HomeFragment extends Fragment {
                                 // Haptic Feedback
 
                                 isRecording = true;
-                                Toast.makeText(getContext(), "T", Toast.LENGTH_SHORT).show();
+
                             });
                         }
 
@@ -558,7 +559,11 @@ public class HomeFragment extends Fragment {
         try {
             File videoDir = new File(requireActivity().getExternalFilesDir(null), "tapsss");
             if (!videoDir.exists()) {
-                videoDir.mkdirs();
+                if (videoDir.mkdirs()) {
+                    Log.d(TAG, "setupMediaRecorder: Directory created successfully");
+                } else {
+                    Log.e(TAG, "setupMediaRecorder: Failed to create directory");
+                }
             }
             String timestamp = new SimpleDateFormat("yyyyMMdd_hh_mm_ssa", Locale.getDefault()).format(new Date());
             File videoFile = new File(videoDir, "temp_" + timestamp + ".mp4");
@@ -573,17 +578,17 @@ public class HomeFragment extends Fragment {
             switch (selectedQuality) {
                 case QUALITY_SD:
                     mediaRecorder.setVideoSize(640, 480);
-                    mediaRecorder.setVideoEncodingBitRate(1000000); // 1 Mbps
+                    mediaRecorder.setVideoEncodingBitRate(500000); // 0.5 Mbps
                     mediaRecorder.setVideoFrameRate(90);
                     break;
                 case QUALITY_FHD:
                     mediaRecorder.setVideoSize(1920, 1080);
-                    mediaRecorder.setVideoEncodingBitRate(10000000); // 10 Mbps
+                    mediaRecorder.setVideoEncodingBitRate(5000000);// 5 Mbps
                     mediaRecorder.setVideoFrameRate(90);
                     break;
                 default:
                     mediaRecorder.setVideoSize(1280, 720);
-                    mediaRecorder.setVideoEncodingBitRate(5000000); // 5 Mbps
+                    mediaRecorder.setVideoEncodingBitRate(2500000);
                     mediaRecorder.setVideoFrameRate(90);
                     break;
             }
@@ -591,6 +596,7 @@ public class HomeFragment extends Fragment {
             mediaRecorder.setAudioEncodingBitRate(384000);
             mediaRecorder.setAudioSamplingRate(48000);
             mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            // Set video encoder to HEVC (H.265) for better compression
             mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
 
             if (getCameraSelection().equals("front")) {
@@ -657,7 +663,7 @@ public class HomeFragment extends Fragment {
                 cameraCaptureSession.abortCaptures();
                 releaseCamera();
 
-                Toast.makeText(getContext(), "F", Toast.LENGTH_SHORT).show();
+
 
                 // Add watermarking here if necessary
                 // Get the latest video file
