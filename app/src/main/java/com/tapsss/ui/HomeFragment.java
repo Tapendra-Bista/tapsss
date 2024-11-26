@@ -578,18 +578,24 @@ public class HomeFragment extends Fragment {
             switch (selectedQuality) {
                 case QUALITY_SD:
                     mediaRecorder.setVideoSize(640, 480);
-                    mediaRecorder.setVideoEncodingBitRate(500000); // 0.5 Mbps
-                    mediaRecorder.setVideoFrameRate(90);
+                    mediaRecorder.setVideoEncodingBitRate(10000000);  // 0.5 Mbps
+                    mediaRecorder.setVideoFrameRate(60);
                     break;
                 case QUALITY_FHD:
                     mediaRecorder.setVideoSize(1920, 1080);
-                    mediaRecorder.setVideoEncodingBitRate(5000000);// 5 Mbps
-                    mediaRecorder.setVideoFrameRate(90);
+
+                    mediaRecorder.setVideoEncodingBitRate(100000000);
+                    mediaRecorder.setVideoFrameRate(60);
+                    break;
+                case QUALITY_HD:
+                    mediaRecorder.setVideoSize(1280, 720);
+                    mediaRecorder.setVideoEncodingBitRate(50000000); // 5 Mbps
+                    mediaRecorder.setVideoFrameRate(60);
                     break;
                 default:
                     mediaRecorder.setVideoSize(1280, 720);
-                    mediaRecorder.setVideoEncodingBitRate(2500000);
-                    mediaRecorder.setVideoFrameRate(90);
+                    mediaRecorder.setVideoEncodingBitRate(50000000);
+                    mediaRecorder.setVideoFrameRate(60);
                     break;
             }
             // Audio settings: high-quality audio
@@ -772,9 +778,9 @@ public class HomeFragment extends Fragment {
         int fontSize;
         int videoBitrate = getVideoBitrate(); // Ensure this method retrieves the correct bitrate based on the selected quality
 
-        if (videoBitrate <= 1000000) {
+        if (videoBitrate <= 10000000) {
             fontSize = 12; //SD quality
-        } else if (videoBitrate == 10000000) {
+        } else if (videoBitrate == 100000000) {
             fontSize = 24; // FHD quality
         } else {
             fontSize = 16; // HD or higher quality
@@ -789,16 +795,16 @@ public class HomeFragment extends Fragment {
         int bitrate;
         switch (selectedQuality) {
             case QUALITY_SD:
-                bitrate = 1000000; // 1 Mbps
+                bitrate = 10000000; // 1 Mbps
                 break;
             case QUALITY_HD:
-                bitrate = 5000000; // 5 Mbps
+                bitrate = 50000000; // 5 Mbps
                 break;
             case QUALITY_FHD:
-                bitrate = 10000000; // 10 Mbps
+                bitrate = 100000000; // 10 Mbps
                 break;
             default:
-                bitrate = 5000000; // Default to HD
+                bitrate = 50000000; // Default to HD
                 break;
         }
         Log.d(TAG, "Selected Video Bitrate: " + bitrate + " bps");
