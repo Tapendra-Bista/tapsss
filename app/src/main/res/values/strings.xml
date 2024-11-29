@@ -1,11 +1,7 @@
 <resources>
     <string name="app_name">tapsss</string>
 
-    <string-array name="video_quality_array">
-        <item name="quality_fhd">FHD (1920x1080)</item>
-        <item name="quality_hd">HD (1280x720)</item>
-        <item name="quality_sd">SD (640x480)</item>
-    </string-array>
+
 
     <string name="back">Back</string>
     <string name="front">Front</string>

@@ -47,7 +47,6 @@ import androidx.fragment.app.Fragment;
 import com.arthenica.ffmpegkit.FFmpegKit;
 import com.tapsss.R;
 import com.tapsss.RecordingService;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,10 +89,7 @@ public class HomeFragment extends Fragment {
         new Handler();
     }
 
-    private static final String PREF_VIDEO_QUALITY = "video_quality";
-    private static final String QUALITY_SD = "SD";
-    private static final String QUALITY_HD = "HD";
-    private static final String QUALITY_FHD = "FHD";
+
 
 
     private TextView tvPreviewPlaceholder;
@@ -436,22 +432,8 @@ public class HomeFragment extends Fragment {
 //recording service section
 
     private void setVideoBitrate() {
-        String selectedQuality = sharedPreferences.getString(PREF_VIDEO_QUALITY, QUALITY_HD);
         long videoBitrate;
-        switch (selectedQuality) {
-            case QUALITY_SD:
-                videoBitrate = 1000000; // 1 Mbps
-                break;
-            case QUALITY_HD:
-                videoBitrate = 5000000; // 5 Mbps
-                break;
-            case QUALITY_FHD:
-                videoBitrate = 10000000; // 10 Mbps
-                break;
-            default:
-                videoBitrate = 5000000; // Default to HD
-                break;
-        }
+        videoBitrate = 10000000; // Default to HD
         Log.d(TAG, "setVideoBitrate: Set to " + videoBitrate + " bps");
     }
 
@@ -573,31 +555,11 @@ public class HomeFragment extends Fragment {
             mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
             mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
-
-            String selectedQuality = sharedPreferences.getString(PREF_VIDEO_QUALITY, QUALITY_HD);
-            switch (selectedQuality) {
-                case QUALITY_SD:
-                    mediaRecorder.setVideoSize(640, 480);
-                    mediaRecorder.setVideoEncodingBitRate(10000000);  // 0.5 Mbps
-                    mediaRecorder.setVideoFrameRate(60);
-                    break;
-                case QUALITY_FHD:
                     mediaRecorder.setVideoSize(1920, 1080);
-
                     mediaRecorder.setVideoEncodingBitRate(100000000);
                     mediaRecorder.setVideoFrameRate(60);
-                    break;
-                case QUALITY_HD:
-                    mediaRecorder.setVideoSize(1280, 720);
-                    mediaRecorder.setVideoEncodingBitRate(50000000); // 5 Mbps
-                    mediaRecorder.setVideoFrameRate(60);
-                    break;
-                default:
-                    mediaRecorder.setVideoSize(1280, 720);
-                    mediaRecorder.setVideoEncodingBitRate(50000000);
-                    mediaRecorder.setVideoFrameRate(60);
-                    break;
-            }
+
+
             // Audio settings: high-quality audio
             mediaRecorder.setAudioEncodingBitRate(384000);
             mediaRecorder.setAudioSamplingRate(48000);
@@ -778,9 +740,7 @@ public class HomeFragment extends Fragment {
         int fontSize;
         int videoBitrate = getVideoBitrate(); // Ensure this method retrieves the correct bitrate based on the selected quality
 
-        if (videoBitrate <= 10000000) {
-            fontSize = 12; //SD quality
-        } else if (videoBitrate == 100000000) {
+        if (videoBitrate == 100000000) {
             fontSize = 24; // FHD quality
         } else {
             fontSize = 16; // HD or higher quality
@@ -791,23 +751,11 @@ public class HomeFragment extends Fragment {
     }
 
     private int getVideoBitrate() {
-        String selectedQuality = sharedPreferences.getString(PREF_VIDEO_QUALITY, QUALITY_HD);
+
         int bitrate;
-        switch (selectedQuality) {
-            case QUALITY_SD:
-                bitrate = 10000000; // 1 Mbps
-                break;
-            case QUALITY_HD:
-                bitrate = 50000000; // 5 Mbps
-                break;
-            case QUALITY_FHD:
+
                 bitrate = 100000000; // 10 Mbps
-                break;
-            default:
-                bitrate = 50000000; // Default to HD
-                break;
-        }
-        Log.d(TAG, "Selected Video Bitrate: " + bitrate + " bps");
+
         return bitrate;
     }
 

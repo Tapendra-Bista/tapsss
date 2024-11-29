@@ -66,24 +66,6 @@
                 </com.google.android.material.button.MaterialButtonToggleGroup>
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:background="?android:attr/listDivider" />
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <Spinner
-                    android:id="@+id/quality_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp" />
-
-            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"

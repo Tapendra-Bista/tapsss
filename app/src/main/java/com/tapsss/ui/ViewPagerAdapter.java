@@ -17,12 +17,12 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
         switch (position) {
             case 0:
                 return new Fragment_black();
-
             case 1:
+                return new SettingsFragment();
+            case 2:
                 return new HomeFragment();
 
-            case 2:
-                return new SettingsFragment();
+
             case 3 :
                 return  new RecordsFragment();
         }

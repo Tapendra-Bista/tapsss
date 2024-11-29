@@ -12,12 +12,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
+
 
 import androidx.annotation.NonNull;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 
@@ -34,13 +33,11 @@ public class SettingsFragment extends Fragment {
 
 
     private static final String PREF_CAMERA_SELECTION = "camera_selection";
-    private static final String PREF_VIDEO_QUALITY = "video_quality";
+
 
     private static final String CAMERA_FRONT = "front";
     private static final String CAMERA_BACK = "back";
-    private static final String QUALITY_SD = "SD";
-    private static final String QUALITY_HD = "HD";
-    private static final String QUALITY_FHD = "FHD";
+
     static final String PREF_LOCATION_DATA = "location_data";
 
 
@@ -48,8 +45,8 @@ public class SettingsFragment extends Fragment {
     private void updateButtonAppearance(MaterialButton button, boolean isSelected) {
         button.setIconTintResource(isSelected ? R.color.black : android.R.color.transparent); // color for check icon
         button.setStrokeColorResource(isSelected ? R.color.colorPrimary : R.color.material_on_surface_stroke); // the last color is for the button that's not selected
-        button.setTextColor(getResources().getColor(isSelected ? R.color.black : R.color.material_on_surface_emphasis_medium));
-        button.setBackgroundColor(getResources().getColor(isSelected ? R.color.colorPrimary : android.R.color.transparent));
+        button.setTextColor( ContextCompat.getColor(requireContext(),isSelected ? R.color.black : R.color.material_on_surface_emphasis_medium));
+        button.setBackgroundColor( ContextCompat.getColor(requireContext(),isSelected ? R.color.colorPrimary : android.R.color.transparent));
     }
 
     @Override
@@ -68,17 +65,12 @@ public class SettingsFragment extends Fragment {
 
         MaterialButtonToggleGroup cameraSelectionToggle = view.findViewById(R.id.camera_selection_toggle);
         // Setup spinner items with array resource
-        Spinner qualitySpinner = view.findViewById(R.id.quality_spinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                requireContext(), R.array.video_quality_options, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        qualitySpinner.setAdapter(adapter);
+
 
         // Set up camera selection toggle
         setupCameraSelectionToggle(view, cameraSelectionToggle);
 
-        // Set up video quality spinner
-        setupQualitySpinner(view, qualitySpinner);
+
 
 
         return view;
@@ -132,47 +124,7 @@ public class SettingsFragment extends Fragment {
         });
     }
 
-    private void setupQualitySpinner(View view, Spinner qualitySpinner) {
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(requireContext(),
-                R.array.video_quality_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        qualitySpinner.setAdapter(adapter);
 
-        // Set the selected item based on the saved preference
-        String selectedQuality = sharedPreferences.getString(PREF_VIDEO_QUALITY, QUALITY_HD);
-        int selectedIndex = 1; // Default to HD
-        switch (selectedQuality) {
-            case QUALITY_FHD:
-                selectedIndex = 0;
-                break;
-            case QUALITY_SD:
-                selectedIndex = 2;
-                break;
-        }
-        qualitySpinner.setSelection(selectedIndex);
-
-        // Save the selected quality when user changes it
-        qualitySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedQuality = QUALITY_HD;
-                switch (position) {
-                    case 0:
-                        selectedQuality = QUALITY_FHD;
-                        break;
-                    case 2:
-                        selectedQuality = QUALITY_SD;
-                        break;
-                }
-                sharedPreferences.edit().putString(PREF_VIDEO_QUALITY, selectedQuality).apply();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Do nothing
-            }
-        });
-    }
 
 
 

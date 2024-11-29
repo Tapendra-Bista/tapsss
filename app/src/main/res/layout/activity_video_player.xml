@@ -20,6 +20,6 @@
         android:contentDescription="@string/todo"
         android:src="@drawable/ic_back"
         android:padding="16dp"
-        android:layout_margin="16dp" />
+        android:layout_margin="10dp" />
 
 </FrameLayout>
