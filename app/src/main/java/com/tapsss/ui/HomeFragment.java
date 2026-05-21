@@ -22,7 +22,6 @@ import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 
 
 import android.util.Log;
@@ -37,6 +36,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -45,6 +46,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.arthenica.ffmpegkit.FFmpegKit;
+import com.arthenica.ffmpegkit.ReturnCode;
 import com.tapsss.R;
 import com.tapsss.RecordingService;
 import java.io.File;
@@ -61,10 +63,6 @@ import java.util.Locale;
 
 
 import java.util.List;
-
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class HomeFragment extends Fragment {
 
@@ -85,19 +83,28 @@ public class HomeFragment extends Fragment {
     private TextureView textureView;
     private SharedPreferences sharedPreferences;
 
-    static {
-        new Handler();
-    }
-
-
-
-
     private TextView tvPreviewPlaceholder;
     private Button buttonStartStop;
 
     private boolean isPreviewEnabled = true;
 
     private View cardPreview;
+
+    private final ActivityResultLauncher<String[]> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+                boolean allGranted = true;
+                for (Boolean granted : result.values()) {
+                    if (!granted) {
+                        allGranted = false;
+                        break;
+                    }
+                }
+                if (allGranted) {
+                    Log.d(TAG, "All essential permissions granted");
+                } else {
+                    Log.d(TAG, "Some essential permissions denied");
+                }
+            });
 
 
 
@@ -119,36 +126,28 @@ public class HomeFragment extends Fragment {
 
 
 // important
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     private void requestEssentialPermissions() {
         Log.d(TAG, "requestEssentialPermissions: Requesting essential permissions");
-        String[] permissions;
+        List<String> permissions = new ArrayList<>();
+        permissions.add(Manifest.permission.CAMERA);
+        permissions.add(Manifest.permission.RECORD_AUDIO);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { // Android 11 and above
-            permissions = new String[]{
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.READ_MEDIA_VIDEO,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-            };
-        } else { // Below Android 11
-            permissions = new String[]{
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-            };
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions.add(Manifest.permission.READ_MEDIA_VIDEO);
+        } else {
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         }
 
         List<String> permissionsToRequest = new ArrayList<>();
         for (String permission : permissions) {
             if (ContextCompat.checkSelfPermission(requireContext(), permission) != PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "requestEssentialPermissions: Requesting permission: " + permission);
                 permissionsToRequest.add(permission);
             }
         }
 
         if (!permissionsToRequest.isEmpty()) {
-            ActivityCompat.requestPermissions(requireActivity(), permissionsToRequest.toArray(new String[0]), REQUEST_PERMISSIONS);
+            requestPermissionLauncher.launch(permissionsToRequest.toArray(new String[0]));
         }
     }
 
@@ -233,9 +232,7 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "HomeFragment created.");
 
         // Request essential permissions on every launch
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestEssentialPermissions();
-        }
+        requestEssentialPermissions();
 
         // Check if it's the first launch
 
@@ -432,8 +429,7 @@ public class HomeFragment extends Fragment {
 //recording service section
 
     private void setVideoBitrate() {
-        long videoBitrate;
-        videoBitrate = 10000000; // Default to HD
+        long videoBitrate = 6000000; // 6 Mbps
         Log.d(TAG, "setVideoBitrate: Set to " + videoBitrate + " bps");
     }
 
@@ -458,13 +454,14 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void onDisconnected(@NonNull CameraDevice camera) {
                     Log.w(TAG, "onDisconnected: Camera disconnected");
-                    cameraDevice.close();
+                    camera.close();
+                    cameraDevice = null;
                 }
 
                 @Override
                 public void onError(@NonNull CameraDevice camera, int error) {
                     Log.e(TAG, "onError: Camera error: " + error);
-                    cameraDevice.close();
+                    camera.close();
                     cameraDevice = null;
                 }
             }, null);
@@ -482,7 +479,7 @@ public class HomeFragment extends Fragment {
             tvPreviewPlaceholder.setVisibility(View.VISIBLE);
             textureView.setVisibility(View.VISIBLE);
             openCamera();
-            Log.e(TAG, "startRecordingVideo: TextureView is now available             550");
+            Log.e(TAG, "startRecordingVideo: TextureView is now available");
         }
 
         if (null == cameraDevice || !textureView.isAvailable() || !Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
@@ -490,11 +487,10 @@ public class HomeFragment extends Fragment {
             return;
         }
         try {
-            Log.e(TAG, "startRecordingVideo: TextureView found, success             556+");
             setupMediaRecorder();
             SurfaceTexture texture = textureView.getSurfaceTexture();
             assert texture != null;
-            texture.setDefaultBufferSize(720, 1080);
+            texture.setDefaultBufferSize(1920, 1080);
             Surface previewSurface = new Surface(texture);
             Surface recorderSurface = mediaRecorder.getSurface();
             captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
@@ -514,26 +510,20 @@ public class HomeFragment extends Fragment {
                                 cameraCaptureSession.setRepeatingRequest(captureRequestBuilder.build(), null, null);
                             } catch (CameraAccessException e) {
                                 Log.e(TAG, "onConfigured: Error setting repeating request", e);
-                                e.printStackTrace();
                             }
                             mediaRecorder.start();
                             requireActivity().runOnUiThread(() -> {
-                                // Haptic Feedback
-
                                 isRecording = true;
-
                             });
                         }
 
                         @Override
                         public void onConfigureFailed(@NonNull CameraCaptureSession session) {
                             Log.e(TAG, "onConfigureFailed: Failed to configure camera capture session");
-
                         }
                     }, null);
         } catch (CameraAccessException e) {
             Log.e(TAG, "startRecordingVideo: Camera access exception", e);
-            e.printStackTrace();
         }
     }
 
@@ -541,31 +531,32 @@ public class HomeFragment extends Fragment {
         try {
             File videoDir = new File(requireActivity().getExternalFilesDir(null), "tapsss");
             if (!videoDir.exists()) {
-                if (videoDir.mkdirs()) {
-                    Log.d(TAG, "setupMediaRecorder: Directory created successfully");
-                } else {
-                    Log.e(TAG, "setupMediaRecorder: Failed to create directory");
-                }
+                videoDir.mkdirs();
             }
             String timestamp = new SimpleDateFormat("yyyyMMdd_hh_mm_ssa", Locale.getDefault()).format(new Date());
             File videoFile = new File(videoDir, "temp_" + timestamp + ".mp4");
 
-            mediaRecorder = new MediaRecorder();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                mediaRecorder = new MediaRecorder(requireContext());
+            } else {
+                mediaRecorder = new MediaRecorder();
+            }
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
-                    mediaRecorder.setVideoSize(1920, 1080);
-                    mediaRecorder.setVideoEncodingBitRate(100000000);
-                    mediaRecorder.setVideoFrameRate(60);
-
-
-            // Audio settings: high-quality audio
-            mediaRecorder.setAudioEncodingBitRate(384000);
-            mediaRecorder.setAudioSamplingRate(48000);
+            
+            // Audio settings
             mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            // Set video encoder to HEVC (H.265) for better compression
+            mediaRecorder.setAudioEncodingBitRate(128000);
+            mediaRecorder.setAudioSamplingRate(44100);
+
+            // Video settings
             mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+            mediaRecorder.setVideoSize(1920, 1080);
+            mediaRecorder.setVideoFrameRate(30);
+            mediaRecorder.setVideoEncodingBitRate(6000000);
+
+            mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
 
             if (getCameraSelection().equals("front")) {
                 mediaRecorder.setOrientationHint(270);
@@ -573,46 +564,13 @@ public class HomeFragment extends Fragment {
                 mediaRecorder.setOrientationHint(90);
             }
 
-
             mediaRecorder.prepare();
         } catch (IOException e) {
             Log.e(TAG, "setupMediaRecorder: Error setting up media recorder", e);
-            e.printStackTrace();
         }
     }
 
 
-    private void checkAndDeleteSpecificTempFile() {
-        if (tempFileBeingProcessed != null) {
-
-            // Construct tapsss_ filename with the same timestamp
-            String outputFilePath = tempFileBeingProcessed.getParent() + "/tapsss_" + tempFileBeingProcessed.getName().replace("temp_", "");
-            File outputFile = new File(outputFilePath);
-
-            // Check if the tapsss_ file exists
-            if (outputFile.exists()) {
-                // Delete temp file
-                if (tempFileBeingProcessed.delete()) {
-                    Log.d(TAG, "Temp file deleted successfully.");
-                } else {
-                    Log.e(TAG, "Failed to delete temp file.");
-                }
-                // Reset tempFileBeingProcessed to null after deletion
-                tempFileBeingProcessed = null;
-            } else {
-                // tapsss_ file does not exist yet
-                Log.d(TAG, "Matching tapsss_ file not found. Temp file remains.");
-            }
-        }
-    }
-
-
-
-    private void startMonitoring() {
-        final long CHECK_INTERVAL_MS = 1000; // 1 second
-
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::checkAndDeleteSpecificTempFile, 0, CHECK_INTERVAL_MS, TimeUnit.MILLISECONDS);
-    }
 
 
 
@@ -626,15 +584,22 @@ public class HomeFragment extends Fragment {
         requireActivity().startService(stopIntent);
 
         if (isRecording) {
+            isRecording = false;
             try {
-                cameraCaptureSession.stopRepeating();
-                cameraCaptureSession.abortCaptures();
+                if (mediaRecorder != null) {
+                    try {
+                        mediaRecorder.stop();
+                    } catch (RuntimeException e) {
+                        Log.e(TAG, "stopRecording: MediaRecorder stop failed", e);
+                    }
+                }
+                if (cameraCaptureSession != null) {
+                    cameraCaptureSession.stopRepeating();
+                    cameraCaptureSession.abortCaptures();
+                }
                 releaseCamera();
 
-
-
                 // Add watermarking here if necessary
-                // Get the latest video file
                 File latestVideoFile = getLatestVideoFile();
                 if (latestVideoFile != null) {
                     String inputFilePath = latestVideoFile.getAbsolutePath();
@@ -649,18 +614,14 @@ public class HomeFragment extends Fragment {
                     Log.e(TAG, "No video file found.");
                 }
 
-                isRecording = false;
                 buttonStartStop.setText("");
 
                 tvPreviewPlaceholder.setVisibility(View.VISIBLE);
                 textureView.setVisibility(View.INVISIBLE);
 
-
             } catch (CameraAccessException | IllegalStateException e) {
                 Log.e(TAG, "stopRecording: Error stopping recording", e);
-                e.printStackTrace();
             }
-            isRecording = false;
             updatePreviewVisibility();
         }
     }
@@ -705,45 +666,40 @@ public class HomeFragment extends Fragment {
         String fontPath = requireContext().getFilesDir().getAbsolutePath() + "/ubuntu_regular.ttf";
         String watermarkText =  "";
         String watermarkOption = getWatermarkOption();
-
+        
+        // Use a temporary name while processing to prevent opening unfinished files
+        String processingPath = outputFilePath + ".proc";
 
         switch (watermarkOption) {
             case "timestamp":
-
                 break;
             case "no_watermark":
-                // No watermark, so just copy the video as is
                 String ffmpegCommandNoWatermark = String.format("-i %s -codec copy %s", inputFilePath, outputFilePath);
-                executeFFmpegCommand(ffmpegCommandNoWatermark);
+                executeFFmpegCommand(ffmpegCommandNoWatermark, inputFilePath, outputFilePath);
                 return;
             default:
                 watermarkText = "Captured by tapsss...... t/iE7Ppv2QJV5k+pyebq8g==";
                 break;
         }
 
-
-        Log.d(TAG, "Font Path: " + fontPath);
-
-        // Determine the font size based on the video bitrate
         int fontSize = getFontSizeBasedOnBitrate();
 
-        // Use -q:v 0 to keep the same quality as input
         @SuppressLint("DefaultLocale") String ffmpegCommand = String.format(
-                "-i %s -vf \"drawtext=text='%s':x=10:y=10:fontsize=%d:fontcolor=white:fontfile=%s\" -q:v 0 -codec:a copy %s",
-                inputFilePath, watermarkText, fontSize, fontPath, outputFilePath
+                "-i %s -vf \"drawtext=text='%s':x=10:y=10:fontsize=%d:fontcolor=white:fontfile=%s\" -c:v libx264 -crf 26 -preset superfast -c:a copy %s",
+                inputFilePath, watermarkText, fontSize, fontPath, processingPath
         );
 
-        executeFFmpegCommand(ffmpegCommand);
+        executeFFmpegCommand(ffmpegCommand, inputFilePath, outputFilePath);
     }
 
     private int getFontSizeBasedOnBitrate() {
         int fontSize;
-        int videoBitrate = getVideoBitrate(); // Ensure this method retrieves the correct bitrate based on the selected quality
+        int videoBitrate = getVideoBitrate();
 
-        if (videoBitrate == 100000000) {
+        if (videoBitrate >= 6000000) {
             fontSize = 24; // FHD quality
         } else {
-            fontSize = 16; // HD or higher quality
+            fontSize = 16; // HD or lower quality
         }
 
         Log.d(TAG, "Determined Font Size: " + fontSize);
@@ -751,26 +707,28 @@ public class HomeFragment extends Fragment {
     }
 
     private int getVideoBitrate() {
-
-        int bitrate;
-
-                bitrate = 100000000; // 10 Mbps
-
-        return bitrate;
+        return 6000000; // 6 Mbps
     }
 
-    private void executeFFmpegCommand(String ffmpegCommand) {
+    private void executeFFmpegCommand(String ffmpegCommand, String inputPath, String outputPath) {
+        String processingPath = outputPath + ".proc";
         Log.d(TAG, "FFmpeg Command: " + ffmpegCommand);
         FFmpegKit.executeAsync(ffmpegCommand, session -> {
-            if (session.getReturnCode().isSuccess()) {
-                Log.d(TAG, "Watermark added successfully.");
-                //  monitoring temp files
-                startMonitoring();
+            if (ReturnCode.isSuccess(session.getReturnCode())) {
+                // Rename temporary processing file to final file name
+                File procFile = new File(processingPath);
+                File finalFile = new File(outputPath);
+                if (procFile.exists() && procFile.renameTo(finalFile)) {
+                    Log.d(TAG, "Video processed and renamed successfully.");
+                }
 
-                // Notify the adapter to update the thumbnail
-
+                // Delete the original temp recording
+                File tempFile = new File(inputPath);
+                if (tempFile.exists()) {
+                    tempFile.delete();
+                }
             } else {
-                Log.e(TAG, "Failed to add watermark: " + session.getFailStackTrace());
+                Log.e(TAG, "Failed to process video: " + session.getFailStackTrace());
             }
         });
     }
@@ -785,14 +743,20 @@ public class HomeFragment extends Fragment {
 
 
     private void copyFontToInternalStorage() {
+        File outFile = new File(requireContext().getFilesDir(), "ubuntu_regular.ttf");
+        if (outFile.exists()) {
+            Log.d(TAG, "Font already exists in internal storage.");
+            return;
+        }
         AssetManager assetManager = requireContext().getAssets();
         InputStream in = null;
         OutputStream out = null;
         try {
             in = assetManager.open("ubuntu_regular.ttf");
-            File outFile = new File(getContext().getFilesDir(), "ubuntu_regular.ttf");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 out = Files.newOutputStream(outFile.toPath());
+            } else {
+                out = new java.io.FileOutputStream(outFile);
             }
             copyFile(in, out);
             Log.d(TAG, "Font copied to internal storage.");
@@ -838,5 +802,11 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "onDestroyView: Cleaning up resources");
 
         releaseCamera();
+        
+        // Nullify view references to prevent memory leaks
+        textureView = null;
+        buttonStartStop = null;
+        tvPreviewPlaceholder = null;
+        cardPreview = null;
     }
 }

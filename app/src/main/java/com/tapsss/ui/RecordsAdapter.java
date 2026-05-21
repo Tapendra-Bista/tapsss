@@ -50,15 +50,12 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
     private final OnVideoClickListener clickListener;
 
     private final List<File> selectedVideos = new ArrayList<>();
-    private List<File> videoFiles;
 
 
     public RecordsAdapter(Context context, List<File> records, OnVideoClickListener clickListener, RecordsFragment recordsFragment) {
         this.context = context;
         this.records = records;
         this.clickListener = clickListener;
-
-        this.videoFiles = new ArrayList<>(records); // Initialize videoFiles with a copy of records
     }
 
     public interface OnVideoClickListener {
@@ -123,11 +120,11 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
 
         popup.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_delete) {
-                confirmDelete(v.getContext(), records.get(position));
+                confirmDelete(v.getContext(), video);
                 return true;
             }
             if (item.getItemId() == R.id.action_save_to_gallery) {
-                saveToGallery(v.getContext(), records.get(position));
+                saveToGallery(v.getContext(), video);
                 return true;
             }
 
@@ -266,7 +263,6 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordVi
 
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
         this.records = newRecords;
-        this.videoFiles = new ArrayList<>(newRecords); // Update videoFiles to match new records
         diffResult.dispatchUpdatesTo(this);
     }
 

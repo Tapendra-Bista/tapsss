@@ -3,8 +3,6 @@ package com.tapsss.ui;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -55,6 +53,12 @@ public class RecordsFragment extends Fragment implements RecordsAdapter.OnVideoC
         loadRecordsList(); // Load the list in the background
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        executorService.shutdownNow(); // Prevent thread leaks
+    }
+
     private void setupRecyclerView() {
         setLayoutManager();
         adapter = new RecordsAdapter(getContext(), new ArrayList<>(), this, this);
@@ -76,7 +80,13 @@ public class RecordsFragment extends Fragment implements RecordsAdapter.OnVideoC
     private void loadRecordsList() {
         executorService.submit(() -> {
             List<File> recordsList = getRecordsList();
-            requireActivity().runOnUiThread(() -> adapter.updateRecords(recordsList));
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    if (adapter != null) {
+                        adapter.updateRecords(recordsList);
+                    }
+                });
+            }
         });
     }
 
@@ -84,18 +94,15 @@ public class RecordsFragment extends Fragment implements RecordsAdapter.OnVideoC
         List<File> recordsList = new ArrayList<>();
         File recordsDir = new File(requireContext().getExternalFilesDir(null), "tapsss");
         if (recordsDir.exists()) {
-            // Introduce a delay before refreshing the list
-            new Handler(Looper.getMainLooper()).postDelayed(this::loadRecordsList, 500);
             File[] files = recordsDir.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if (file.isFile() && file.getName().endsWith(".mp4")) {
+                    if (file.isFile() && file.getName().endsWith(".mp4") && file.getName().startsWith("tapsss_")) {
                         recordsList.add(file);
                     }
                 }
             }
         }
-        new Handler(Looper.getMainLooper()).postDelayed(this::loadRecordsList, 500);
         return recordsList;
     }
 

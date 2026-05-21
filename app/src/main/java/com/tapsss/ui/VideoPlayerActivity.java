@@ -5,17 +5,19 @@ import android.os.Bundle;
 
 import android.widget.ImageButton;
 
+import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.ui.StyledPlayerView;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.ui.PlayerView;
 import com.tapsss.R;
 
 public class VideoPlayerActivity extends AppCompatActivity {
 
     private ExoPlayer player;
-    private StyledPlayerView playerView;
+    private PlayerView playerView;
     private ImageButton backButton;
 
     @Override
@@ -43,6 +45,22 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
     private void setupBackButton() {
         backButton.setOnClickListener(v -> finish());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (player != null) {
+            player.pause();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (player != null) {
+            player.play();
+        }
     }
 
     @Override
