@@ -91,20 +91,7 @@ public class HomeFragment extends Fragment {
     private View cardPreview;
 
     private final ActivityResultLauncher<String[]> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-                boolean allGranted = true;
-                for (Boolean granted : result.values()) {
-                    if (!granted) {
-                        allGranted = false;
-                        break;
-                    }
-                }
-                if (allGranted) {
-                    Log.d(TAG, "All essential permissions granted");
-                } else {
-                    Log.d(TAG, "Some essential permissions denied");
-                }
-            });
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {});
 
 
 
@@ -127,7 +114,6 @@ public class HomeFragment extends Fragment {
 
 // important
     private void requestEssentialPermissions() {
-        Log.d(TAG, "requestEssentialPermissions: Requesting essential permissions");
         List<String> permissions = new ArrayList<>();
         permissions.add(Manifest.permission.CAMERA);
         permissions.add(Manifest.permission.RECORD_AUDIO);
@@ -229,7 +215,6 @@ public class HomeFragment extends Fragment {
         sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE);
 
 //        requestLocationPermission();
-        Log.d(TAG, "HomeFragment created.");
 
         // Request essential permissions on every launch
         requestEssentialPermissions();
@@ -249,7 +234,6 @@ public class HomeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView: Inflating fragment_home layout");
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
@@ -259,12 +243,14 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Log.d(TAG, "onViewCreated: Setting up UI components");
 
         textureView = view.findViewById(R.id.textureView);
 
         tvPreviewPlaceholder = view.findViewById(R.id.tvPreviewPlaceholder);
         buttonStartStop = view.findViewById(R.id.buttonStartStop);
+        buttonStartStop.setHapticFeedbackEnabled(false);
+        buttonStartStop.setSoundEffectsEnabled(false);
+        buttonStartStop.setBackgroundResource(android.R.color.transparent);
 
 
 
@@ -316,12 +302,6 @@ public class HomeFragment extends Fragment {
     }
 
     private void debugPermissionsStatus() {
-        Log.d(TAG, "Camera permission: " +
-                (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED ? "Granted" : "Denied"));
-        Log.d(TAG, "Record Audio permission: " +
-                (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED ? "Granted" : "Denied"));
-        Log.d(TAG, "Write External Storage permission: " +
-                (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED ? "Granted" : "Denied"));
     }
 
 
@@ -368,7 +348,6 @@ public class HomeFragment extends Fragment {
 
 
     private void updateStats() {
-        Log.d(TAG, "updateStats: Updating video statistics");
         File recordsDir = new File(requireContext().getExternalFilesDir(null), "tapsss");
 
 
@@ -377,15 +356,10 @@ public class HomeFragment extends Fragment {
             if (files != null) {
                 for (File file : files) {
                     if (file.isFile() && file.getName().endsWith(".mp4")) {
-                        Log.d(TAG, "updateStats: "+file);
                     }
                 }
             }
         }
-
-
-
-
     }
 
 
@@ -394,30 +368,18 @@ public class HomeFragment extends Fragment {
 
 
     private void startRecording() {
-        Log.d(TAG, "startRecording: Initiating video recording from home fragment");
-
-        // Set up the camera and MediaRecorder here
         if (!isRecording) {
-
             if (cameraDevice == null) {
                 openCamera();
             } else {
                 startRecordingVideo();
             }
-
             setVideoBitrate();
-
             buttonStartStop.setText("");
-
-
             tvPreviewPlaceholder.setVisibility(View.GONE);
             textureView.setVisibility(View.VISIBLE);
-
-
             isRecording = true;
             updatePreviewVisibility();
-
-            // Start the recording service
             Intent startIntent = new Intent(getActivity(), RecordingService.class);
             startIntent.setAction("ACTION_START_RECORDING");
             requireActivity().startService(startIntent);
@@ -429,8 +391,6 @@ public class HomeFragment extends Fragment {
 //recording service section
 
     private void setVideoBitrate() {
-        long videoBitrate = 6000000; // 6 Mbps
-        Log.d(TAG, "setVideoBitrate: Set to " + videoBitrate + " bps");
     }
 
     private String getCameraSelection() {
@@ -438,7 +398,6 @@ public class HomeFragment extends Fragment {
     }
 
     private void openCamera() {
-        Log.d(TAG, "openCamera: Opening camera");
         CameraManager manager = (CameraManager) requireActivity().getSystemService(Context.CAMERA_SERVICE);
         try {
             String[] cameraIdList = manager.getCameraIdList();
@@ -446,7 +405,6 @@ public class HomeFragment extends Fragment {
             manager.openCamera(cameraId, new CameraDevice.StateCallback() {
                 @Override
                 public void onOpened(@NonNull CameraDevice camera) {
-                    Log.d(TAG, "onOpened: Camera opened successfully");
                     cameraDevice = camera;
                     startRecordingVideo();
                 }
@@ -472,18 +430,14 @@ public class HomeFragment extends Fragment {
     }
 
     private void startRecordingVideo() {
-        Log.d(TAG, "startRecordingVideo: Setting up video recording preview area");
-
         // Check if TextureView is available before starting recording
         if (!textureView.isAvailable())  {
             tvPreviewPlaceholder.setVisibility(View.VISIBLE);
             textureView.setVisibility(View.VISIBLE);
             openCamera();
-            Log.e(TAG, "startRecordingVideo: TextureView is now available");
         }
 
         if (null == cameraDevice || !textureView.isAvailable() || !Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            Log.e(TAG, "startRecordingVideo: Unable to start recording due to missing prerequisites");
             return;
         }
         try {
@@ -504,12 +458,10 @@ public class HomeFragment extends Fragment {
                     new CameraCaptureSession.StateCallback() {
                         @Override
                         public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
-                            Log.d(TAG, "onConfigured: Camera capture session configured");
                             HomeFragment.this.cameraCaptureSession = cameraCaptureSession;
                             try {
                                 cameraCaptureSession.setRepeatingRequest(captureRequestBuilder.build(), null, null);
                             } catch (CameraAccessException e) {
-                                Log.e(TAG, "onConfigured: Error setting repeating request", e);
                             }
                             mediaRecorder.start();
                             requireActivity().runOnUiThread(() -> {
@@ -576,9 +528,6 @@ public class HomeFragment extends Fragment {
 
 
     private void stopRecording() {
-        Log.d(TAG, "stopRecording: Stopping video recording");
-
-        // Stop the recording service
         Intent stopIntent = new Intent(getActivity(), RecordingService.class);
         stopIntent.setAction("ACTION_STOP_RECORDING");
         requireActivity().startService(stopIntent);
@@ -590,7 +539,6 @@ public class HomeFragment extends Fragment {
                     try {
                         mediaRecorder.stop();
                     } catch (RuntimeException e) {
-                        Log.e(TAG, "stopRecording: MediaRecorder stop failed", e);
                     }
                 }
                 if (cameraCaptureSession != null) {
@@ -599,28 +547,21 @@ public class HomeFragment extends Fragment {
                 }
                 releaseCamera();
 
-                // Add watermarking here if necessary
                 File latestVideoFile = getLatestVideoFile();
                 if (latestVideoFile != null) {
                     String inputFilePath = latestVideoFile.getAbsolutePath();
                     String originalFileName = latestVideoFile.getName().replace("temp_", "");
                     String outputFilePath = latestVideoFile.getParent() + "/tapsss_" + originalFileName;
-                    Log.d(TAG, "Watermarking: Input file path: " + inputFilePath);
-                    Log.d(TAG, "Watermarking: Output file path: " + outputFilePath);
 
                     tempFileBeingProcessed = latestVideoFile;
                     addTextWatermarkToVideo(inputFilePath, outputFilePath);
-                } else {
-                    Log.e(TAG, "No video file found.");
                 }
 
                 buttonStartStop.setText("");
-
                 tvPreviewPlaceholder.setVisibility(View.VISIBLE);
                 textureView.setVisibility(View.INVISIBLE);
 
             } catch (CameraAccessException | IllegalStateException e) {
-                Log.e(TAG, "stopRecording: Error stopping recording", e);
             }
             updatePreviewVisibility();
         }
@@ -630,7 +571,6 @@ public class HomeFragment extends Fragment {
 //recording service section
 
     private void releaseCamera() {
-        Log.d(TAG, "releaseCamera: Releasing camera resources");
         if (cameraDevice != null) {
             cameraDevice.close();
             cameraDevice = null;
@@ -712,14 +652,12 @@ public class HomeFragment extends Fragment {
 
     private void executeFFmpegCommand(String ffmpegCommand, String inputPath, String outputPath) {
         String processingPath = outputPath + ".proc";
-        Log.d(TAG, "FFmpeg Command: " + ffmpegCommand);
         FFmpegKit.executeAsync(ffmpegCommand, session -> {
             if (ReturnCode.isSuccess(session.getReturnCode())) {
                 // Rename temporary processing file to final file name
                 File procFile = new File(processingPath);
                 File finalFile = new File(outputPath);
                 if (procFile.exists() && procFile.renameTo(finalFile)) {
-                    Log.d(TAG, "Video processed and renamed successfully.");
                 }
 
                 // Delete the original temp recording
@@ -727,8 +665,6 @@ public class HomeFragment extends Fragment {
                 if (tempFile.exists()) {
                     tempFile.delete();
                 }
-            } else {
-                Log.e(TAG, "Failed to process video: " + session.getFailStackTrace());
             }
         });
     }
@@ -745,7 +681,6 @@ public class HomeFragment extends Fragment {
     private void copyFontToInternalStorage() {
         File outFile = new File(requireContext().getFilesDir(), "ubuntu_regular.ttf");
         if (outFile.exists()) {
-            Log.d(TAG, "Font already exists in internal storage.");
             return;
         }
         AssetManager assetManager = requireContext().getAssets();
@@ -759,7 +694,6 @@ public class HomeFragment extends Fragment {
                 out = new java.io.FileOutputStream(outFile);
             }
             copyFile(in, out);
-            Log.d(TAG, "Font copied to internal storage.");
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -799,7 +733,6 @@ public class HomeFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Log.d(TAG, "onDestroyView: Cleaning up resources");
 
         releaseCamera();
         

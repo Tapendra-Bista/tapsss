@@ -65,10 +65,8 @@ public class RecordingService extends Service {
     }
 
     private void startRecording() {
-        Log.d(TAG, "startRecording: Initiating video recording from recording service.");
         if (!isRecording) {
             isRecording = true;
-            Log.d(TAG, "Recording started from recording service.");
 
             // Start foreground service with types for Android 10+
             Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -84,42 +82,30 @@ public class RecordingService extends Service {
             } else {
                 startForeground(NOTIFICATION_ID, notification);
             }
-            Log.d(TAG, "Foreground service started");
 
             Intent intent = new Intent("RECORDING_STATE_CHANGED");
             intent.putExtra("isRecording", true);
             sendBroadcast(intent);
-        } else {
-            Log.d(TAG, "Recording already in progress");
         }
     }
 
     private void stopRecording() {
-        Log.d(TAG, "stopRecording: Attempting to stop recording from recording service.");
         if (isRecording) {
             isRecording = false;
-            Log.d(TAG, "Recording stopped from recording service");
 
             Intent intent = new Intent("RECORDING_STATE_CHANGED");
             intent.putExtra("isRecording", false);
             sendBroadcast(intent);
 
             stopForeground(STOP_FOREGROUND_REMOVE); // Remove notification
-            Log.d(TAG, "Foreground service stopped, notification should be removed");
 
             // Cancel the notification explicitly
             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             if (notificationManager != null) {
                 notificationManager.cancel(NOTIFICATION_ID);
-                Log.d(TAG, "Notification with ID " + NOTIFICATION_ID + " canceled");
-            } else {
-                Log.e(TAG, "NotificationManager is null, unable to cancel notification");
             }
 
             stopSelf();  // Stop the service
-            Log.d(TAG, "Service stopped");
-        } else {
-            Log.d(TAG, "No recording to stop from recording service");
         }
     }
 
